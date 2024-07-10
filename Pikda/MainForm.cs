@@ -22,6 +22,7 @@ namespace Pikda
         {
             get
             {
+                if (currentOcrModel == null) return new List<AreaViewDto>();
                 var l = currentOcrModel.Areas.Select(s => new AreaViewDto
                 {
                     Prop = s.Name,
@@ -64,24 +65,14 @@ namespace Pikda
         {
             this.db = db;
             this.ocrService = ocrService;
-
-            var prop1 = new Area("FirstName",new Rectangle(), new Rectangle());
-            prop1.SetValue("Houdaifa");
-            var prop2 = new Area("LastName", new Rectangle(), new Rectangle());
-            prop2.SetValue("Bouamine");
-            var ocrModel = new OcrModel("National Card");
-
-            var ocrModel2 = new OcrModel("School Card");
-            ocrModel2.AddArea(prop1);
-
-            ocrModel.AddArea(prop1);
-            ocrModel.AddArea(prop2);
-            currentOcrModel = ocrModel;
-
-            ocrModels.Add(ocrModel);
-            ocrModels.Add(ocrModel2);
-
             InitializeComponent();
+
+            if (CardsTable.Items.Count <= 0)
+            {
+                PictureEditor.Enabled = false;
+                PictureEditor.Text = "Create Card First";
+            };
+
             InitializeCardsTable();
             InitializeAreasView();
         }
@@ -99,7 +90,13 @@ namespace Pikda
         {
             CardsTable.Items.AddRange(ocrModels.Select(o=>new ListViewItem(o.Name)).ToArray());
 
-            CardsTable.SelectedIndices.Add(0);
+
+            if (CardsTable.SelectedIndices.Count > 0)
+            {
+                PictureEditor.Enabled = false;
+                PictureEditor.Text = "Load Image Here";
+                CardsTable.SelectedIndices.Add(0);
+            };
 
             ///
 
@@ -108,6 +105,7 @@ namespace Pikda
 
             void CardsTable_AddNewCard(object sender, EventArgs e)
             {
+
                 var result = XtraInputBox.Show("Card Name", "Adding New Card",$"Card-{Guid.NewGuid().ToString().Substring(0,4)}");
                 if(string.IsNullOrEmpty(result))
                 {
@@ -123,6 +121,8 @@ namespace Pikda
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
+
+                PictureEditor.Enabled = true;
 
                 var newOcr = new OcrModel(result);
                 ocrModels.Add(newOcr);
@@ -171,7 +171,7 @@ namespace Pikda
         private ListViewItem SelectedItem { 
             get 
             {
-                if (CardsTable.SelectedIndices.Count <= 0)
+                if (CardsTable.SelectedIndices.Count <= 0 || CardsTable.Items.Count <= 0)
                 {
                     return null; // TODO : Prevent this when there is at least one Item
                 }
@@ -187,7 +187,8 @@ namespace Pikda
 
         private void PictureEditor_ImageChanged(object sender, EventArgs e)
         {
-            currentOcrModel.Image = Image;
+            if(currentOcrModel != null)
+                currentOcrModel.Image = Image;
         }
 
 
