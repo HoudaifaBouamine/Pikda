@@ -5,7 +5,7 @@ using Tesseract;
 
 namespace Pikda
 {
-    internal class OcrService
+    public class OcrService
     {
         public const string folderName = "..\\..\\Images";
         public const string trainedDataFolderName = "..\\..\\tessdata";

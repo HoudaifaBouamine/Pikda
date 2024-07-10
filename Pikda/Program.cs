@@ -1,13 +1,11 @@
 ﻿using DevExpress.LookAndFeel;
 using DevExpress.Skins;
 using DevExpress.UserSkins;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using Microsoft.Extensions.Hosting;
 
 namespace Pikda
 {
@@ -24,14 +22,14 @@ namespace Pikda
             ServiceProvider = host.Services;
 
             Application.Run(ServiceProvider.GetRequiredService<MainForm>());
-
         }
         public static IServiceProvider ServiceProvider { get; private set; }
         static IHostBuilder CreateHostBuilder()
         {
             return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) => {
-                    services.AddDbContext<AppDbContext>();
+                    services.AddDbContext<AppDbContext>(op=>op.UseSqlite("Data Source=Pikda.db"));
+                    services.AddTransient<OcrService>();
                     services.AddTransient<MainForm>();
                 });
         }

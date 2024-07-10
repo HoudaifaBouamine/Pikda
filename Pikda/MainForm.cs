@@ -16,6 +16,8 @@ namespace Pikda
 {
     public partial class MainForm : DevExpress.XtraEditors.XtraForm
     {
+        readonly OcrService ocrService;
+        readonly AppDbContext db;
         List<AreaViewDto> AreaViewDtos 
         {
             get
@@ -58,8 +60,11 @@ namespace Pikda
                 }
             }
         }
-        public MainForm()
+        public MainForm(AppDbContext db ,OcrService ocrService)
         {
+            this.db = db;
+            this.ocrService = ocrService;
+
             var prop1 = new Area("FirstName",new Rectangle(), new Rectangle());
             prop1.SetValue("Houdaifa");
             var prop2 = new Area("LastName", new Rectangle(), new Rectangle());
@@ -221,7 +226,7 @@ namespace Pikda
             PictureEditor.Invalidate();
         }
 
-        private async void PictureEdit_MouseUp(object sender, MouseEventArgs e)
+        private void PictureEdit_MouseUp(object sender, MouseEventArgs e)
         {
 
             if (StartPoint == UnDefinedPoint) return;
@@ -259,22 +264,29 @@ namespace Pikda
                 return;
             }
 
+
+            var imageRect = new Rectangle(0,0,Image.Width,Image.Height);
+            var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
+            var ocrText = ocrService.Process(Image,Guid.NewGuid() + ".jpg", newArea.ToRectangle(imageRect), "ara");
+
+            Console.WriteLine($"\nwidth : {Image.Width}, height : {Image.Height}");
+
+            newArea.Value = ocrText;
+            currentOcrModel.AddArea(newArea);
+            Console.WriteLine("ocr areas count : " + currentOcrModel.Areas.Count());
             Rectangles.Add((CurrentRect, result));
 
-            var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
-            currentOcrModel.AddArea(newArea);
             AreasViewGrid.DataSource = GetAreas();
 
             StartPoint = UnDefinedPoint;
-
             CurrentRect = UnDefinedRect;
 
             Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle rect)
             {
                 rect = new Rectangle
                     (
-                        x: rect.X - (int)(((float)(this.Width - border.Width)) / 2),
-                        y: rect.Y - (int)(((float)(this.Height - border.Height)) / 2),
+                        x: rect.X - (int)(((float)(PictureEditor.Width - border.Width)) / 2),
+                        y: rect.Y - (int)(((float)(PictureEditor.Height - border.Height)) / 2),
                         width: rect.Width,
                         height: rect.Height
                     );
@@ -298,6 +310,7 @@ namespace Pikda
             // Draw all previous rectangles
             foreach (var rect in Rectangles)
             {
+                Console.WriteLine($"rect w : {rect.Item1.Width}, h: {rect.Item1.Height}, x:{rect.Item1.X}, y:{rect.Item1.Y}");
                 g.DrawRectangle(pen, rect.Item1);
             }
 
@@ -324,8 +337,8 @@ namespace Pikda
                 return (
                         new Rectangle
                         (
-                            x: rect.X + (int)(((float)(this.Width - border.Width)) / 2),
-                            y: rect.Y + (int)(((float)(this.Height - border.Height)) / 2),
+                            x: rect.X + (int)(((float)(PictureEditor.Width - border.Width)) / 2),
+                            y: rect.Y + (int)(((float)(PictureEditor.Height - border.Height)) / 2),
                             width: rect.Width,
                             height: rect.Height
                         ),
