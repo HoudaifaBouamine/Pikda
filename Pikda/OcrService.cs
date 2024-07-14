@@ -10,7 +10,14 @@ namespace Pikda
         public const string folderName = "..\\..\\Images";
         public const string trainedDataFolderName = "..\\..\\tessdata";
 
+        public string Process(string imagePath, Rectangle rect, string lang)
+        {
+            Console.WriteLine($"--> Image Saved at : {imagePath}");
 
+            var result = _process(imagePath, lang, new Rect(rect.X, rect.Y, rect.Width, rect.Height));
+
+            return string.IsNullOrWhiteSpace(result) ? "Failed To Read" : result;
+        }
         public string Process(Image image, string imageName, Rectangle rect, string lang)
         {
             var fileName = imageName;

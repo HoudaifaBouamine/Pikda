@@ -28,8 +28,9 @@ namespace Pikda
         {
             return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) => {
-                    services.AddDbContext<AppDbContext>(op=>op.UseSqlite("Data Source=Pikda.db"));
+                    services.AddDbContext<AppDbContext>(op=>op.UseNpgsql("Server=localhost;Database=Pikda;Username=postgres;Password=postgres"));
                     services.AddTransient<OcrService>();
+                    services.AddTransient<OcrRepository>();
                     services.AddTransient<MainForm>();
                 });
         }

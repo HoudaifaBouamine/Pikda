@@ -68,7 +68,6 @@
             this.PictureEditor.TabIndex = 3;
             this.PictureEditor.ImageChanged += new System.EventHandler(this.PictureEditor_ImageChanged);
             this.PictureEditor.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
-            this.PictureEditor.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PictureEditor_MouseClick);
             this.PictureEditor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseDown);
             this.PictureEditor.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
             this.PictureEditor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);

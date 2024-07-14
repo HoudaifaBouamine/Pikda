@@ -12,7 +12,7 @@ namespace Pikda
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            
+            Database.EnsureCreated();
         }
 
         public DbSet<OcrModel> OcrModels { get; set; }

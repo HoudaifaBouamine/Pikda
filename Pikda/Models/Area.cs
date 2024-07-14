@@ -1,12 +1,13 @@
-﻿
-using System.Drawing;
+﻿using System.Drawing;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Pikda.Models
 {
-
     public class Area
-    { 
+    {
+        [Key]
         public int Id { get; private set; }
         public string Name { get; private set; }
         public string Value { get; set; }
@@ -14,7 +15,9 @@ namespace Pikda.Models
         public float YFactor { get; private set; }
         public float WidthFactor { get; private set; }
         public float HeightFactor { get; private set; }
-        public OcrModel OcrModel { get; set; }
+
+        [ForeignKey(nameof(OcrModel))]
+        public int OcrModelId { get; set; }
 
         public Area(string name, Rectangle imageRect, Rectangle newRect)
         {
@@ -45,7 +48,5 @@ namespace Pikda.Models
                     height: (int)(HeightFactor * currentImageRect.Height)
                 );
         }
-
     }
-
 }
