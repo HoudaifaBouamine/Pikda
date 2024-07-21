@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DevExpress.Utils.Behaviors;
+using Microsoft.EntityFrameworkCore;
 using Pikda.Models;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,9 @@ namespace Pikda
     {
         readonly AppDbContext db;
         readonly static string ImagePath = "..\\..\\Images";
-        public OcrRepository(AppDbContext db) 
+        public OcrRepository() 
         {
-            this.db = db;
+            this.db = new AppDbContext();
         }
 
         //public List<OcrModel> GetOcrModels()
@@ -42,7 +43,7 @@ namespace Pikda
             {
                 var reader = new FileStream(o.ImageUrl, FileMode.Open);
                 o.InitImage(Image.FromStream(reader));
-                
+                reader.Close();
             });
 
             return list;

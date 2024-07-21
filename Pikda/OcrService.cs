@@ -57,21 +57,29 @@ namespace Pikda
                 var img = Pix.LoadFromFile(imagePath);
 
                 img = img.ConvertTo8(0);
-                img = img.BinarizeSauvolaTiled(50, 0.35f, 1, 1);
-
+                img = img.BinarizeSauvola(50,0.35f,false);
+                
                 //var btmFromPix = PixConverter.ToBitmap(img);
 
                 //using (var fileStream = new FileStream(imagePath, FileMode.Create))
                 //{
-                //    btmFromPix.Save( Path.Combine("..","..","preImages",Guid.NewGuid() + ".jpg"));
+                //    btmFromPix.Save(Path.Combine("..", "..", "preImages", Guid.NewGuid() + ".jpg"));
                 //}
 
-                var page = engine.Process(img, rect);
+                Page page = default;
 
+                try
+                {
+                    page = engine.Process(img, rect);
+                }
+                catch (Exception ex)
+                {
+                    result = ex.Message;
+                    return "error : " + result;
+                }
                 result = page.GetText();
+                return result;
             }
-
-            return result;
         }
         private string _process(string imagePath, string lang)
         {
