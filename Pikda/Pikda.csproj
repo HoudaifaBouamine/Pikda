@@ -46,6 +46,7 @@
     <Reference Include="DevExpress.XtraGrid.v23.2, Version=23.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraLayout.v23.2, Version=23.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraPrinting.v23.2, Version=23.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraTreeList.v23.2, Version=23.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -254,6 +255,18 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\IOcrObject.cs" />
+    <Compile Include="OcrCardScanerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OcrCardScanerForm.Designer.cs">
+      <DependentUpon>OcrCardScanerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OcrScanner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OcrScanner.Designer.cs">
+      <DependentUpon>OcrScanner.cs</DependentUpon>
+    </Compile>
     <Compile Include="OCR_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -268,6 +281,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OcrCardScanerForm.resx">
+      <DependentUpon>OcrCardScanerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OcrScanner.resx">
+      <DependentUpon>OcrScanner.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OCR_Form.resx">
       <DependentUpon>OCR_Form.cs</DependentUpon>
