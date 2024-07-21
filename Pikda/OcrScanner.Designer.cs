@@ -31,11 +31,10 @@
             this.LayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.AreasViewGrid = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.PictureEditor = new DevExpress.XtraEditors.PictureEdit();
+            this.cameraControl1 = new DevExpress.XtraEditors.Camera.CameraControl();
             this.LayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PictureEditor.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // LayoutPanel
@@ -43,8 +42,8 @@
             this.LayoutPanel.ColumnCount = 2;
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 977F));
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 8F));
-            this.LayoutPanel.Controls.Add(this.PictureEditor, 0, 0);
             this.LayoutPanel.Controls.Add(this.AreasViewGrid, 1, 0);
+            this.LayoutPanel.Controls.Add(this.cameraControl1, 0, 0);
             this.LayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.LayoutPanel.Name = "LayoutPanel";
@@ -69,21 +68,15 @@
             this.gridView1.GridControl = this.AreasViewGrid;
             this.gridView1.Name = "gridView1";
             // 
-            // PictureEditor
+            // cameraControl1
             // 
-            this.PictureEditor.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.PictureEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PictureEditor.Location = new System.Drawing.Point(3, 3);
-            this.PictureEditor.Name = "PictureEditor";
-            this.PictureEditor.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
-            this.PictureEditor.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
-            this.PictureEditor.Size = new System.Drawing.Size(971, 560);
-            this.PictureEditor.TabIndex = 3;
-            this.PictureEditor.ImageChanged += new System.EventHandler(this.PictureEditor_ImageChanged);
-            this.PictureEditor.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
-            this.PictureEditor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseDown);
-            this.PictureEditor.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
-            this.PictureEditor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);
+            this.cameraControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cameraControl1.Location = new System.Drawing.Point(3, 3);
+            this.cameraControl1.Name = "cameraControl1";
+            this.cameraControl1.Size = new System.Drawing.Size(971, 560);
+            this.cameraControl1.TabIndex = 1;
+            this.cameraControl1.Text = "cameraControl1";
+            this.cameraControl1.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
             // 
             // OcrScannerForm
             // 
@@ -97,7 +90,6 @@
             this.LayoutPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PictureEditor.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -107,7 +99,7 @@
         private System.Windows.Forms.TableLayoutPanel LayoutPanel;
         private DevExpress.XtraGrid.GridControl AreasViewGrid;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
-        private DevExpress.XtraEditors.PictureEdit PictureEditor;
+        private DevExpress.XtraEditors.Camera.CameraControl cameraControl1;
     }
 }
 

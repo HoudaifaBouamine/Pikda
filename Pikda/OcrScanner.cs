@@ -1,4 +1,8 @@
-﻿using DevExpress.XtraEditors;
+﻿using DevExpress.Data.Camera;
+using DevExpress.Utils.SystemDrawingConversions;
+using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Camera;
+using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Grid;
 using Pikda.Dtos;
@@ -39,46 +43,31 @@ namespace Pikda
         } 
         List<OcrModel> ocrModels = new List<OcrModel>();
 
-        OcrModel _currentOcrModel = null;
-        OcrModel currentOcrModel { 
-            
-            get
-            {
-                return _currentOcrModel;
-            }
-            set
-            {
-                if (_currentOcrModel == value) return;
-                _currentOcrModel = value;
-                RefreshUI();
-
-                void RefreshUI()
-                {
-                    if (AreasViewGrid != null)
-                        AreasViewGrid.DataSource = GetAreas();
-
-                    if (PictureEditor != null)
-                        PictureEditor.Image = currentOcrModel.Image;
-
-                }
-            }
-        }
+        OcrModel currentOcrModel { get;set; }
 
    
-        private Image Image => PictureEditor.Image;
+        //private Image Image => PictureEditor.Image;
 
         #endregion
 
-        public OcrScannerForm(OcrService ocrService, OcrRepository ocrRepository)
+        public OcrScannerForm(int modelId)
         {
-            this.ocrService = ocrService;
-            this.ocrRepository = ocrRepository;
-
+            this.ocrService = new OcrService();
+            this.ocrRepository = new OcrRepository();
+   
             ocrModels = ocrRepository.GetOcrModels();
-
+            currentOcrModel = ocrModels.FirstOrDefault(o => o.Id == modelId);
             InitializeComponent();
 
             InitializeAreasView();
+
+            
+
+            var logitech = CameraControl.GetDevices().FirstOrDefault(x => x.Name.Contains("Webcam"));
+            if (logitech != null)
+            {
+                cameraControl1.Device = CameraControl.GetDevice(logitech);
+            }
         }
 
 
@@ -98,23 +87,7 @@ namespace Pikda
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
             propCol.ColumnEdit = propsLookUp;
         }
-        
-        private async void PictureEditor_ImageChanged(object sender, EventArgs e)
-        {
-            if (currentOcrModel != null)
-            {
-                if(currentOcrModel.Image != null)
-                {
-                    if(currentOcrModel.Image.Size == Image.Size)
-                    {
-                        return;
-                    }
-                }
-
-                currentOcrModel.SetImage(Image);
-                ocrRepository.UpdateOcrModel(currentOcrModel);
-            }
-        }
+       
 
         private List<AreaViewDto> GetAreas()
         {
@@ -130,114 +103,8 @@ namespace Pikda
 
         #region Drawing
 
-        private void PictureEdit_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            if (!ImageBorder.Contains(e.Location))
-                return;
-
-            StartPoint = e.Location;
-            CurrentRect = new Rectangle(e.Location, new Size(0, 0));
-        }
-
-        private void PictureEdit_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (StartPoint == UnDefinedPoint) return;
-
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            EndPoint = e.Location;
-
-            CurrentRect = new Rectangle
-                (
-                    Math.Min(StartPoint.X, EndPoint.X),
-                    Math.Min(StartPoint.Y, EndPoint.Y),
-                    Math.Abs(StartPoint.X - EndPoint.X),
-                    Math.Abs(StartPoint.Y - EndPoint.Y)
-                );
-            CurrentRect.Intersect(ImageBorder);
-
-            PictureEditor.Invalidate();
-        }
-
-        private async void PictureEdit_MouseUp(object sender, MouseEventArgs e)
-        {
-
-            if (StartPoint == UnDefinedPoint) return;
-
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            if (CurrentRect.Width * CurrentRect.Height == 0)
-                return;
-
-            // Add the current rectangle to the list
-            CurrentRect.Intersect(ImageBorder);
-
-            XtraInputBoxArgs args = new XtraInputBoxArgs();
-
-            ComboBoxEdit cbEdit = new ComboBoxEdit();
-            cbEdit.Properties.Items.Add("FirstName");
-            cbEdit.Properties.Items.Add("LastName");
-            cbEdit.Properties.Items.Add("BirthDate");
-
-            args.Caption = "Adding New Property";
-            args.Prompt = "Property Name";
-            args.DefaultButtonIndex = 0;
-
-            args.Editor = cbEdit;
-
-            string result = (string) XtraInputBox.Show(args);
-
-            if (string.IsNullOrEmpty(result))
-            {
-                MessageBox.Show("Can not create rectangle without prop's name", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                CurrentRect = UnDefinedRect;
-                return;
-            }
-
-
-            var imageRect = new Rectangle(0,0,Image.Width,Image.Height);
-            var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
-            var ocrText = ocrService.Process(currentOcrModel.ImageUrl,newArea.ToRectangle(imageRect), "ara");
-
-            Console.WriteLine($"\nwidth : {Image.Width}, height : {Image.Height}");
-
-            newArea.Value = ocrText;
-            currentOcrModel.AddArea(newArea);
-            ocrRepository.UpdateOcrModel(currentOcrModel);
-            Console.WriteLine("ocr areas count : " + currentOcrModel.Areas.Count());
-            Rectangles.Add((CurrentRect, result));
-
-            AreasViewGrid.DataSource = GetAreas();
-
-            StartPoint = UnDefinedPoint;
-            CurrentRect = UnDefinedRect;
-
-            Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle rect)
-            {
-                rect = new Rectangle
-                    (
-                        x: rect.X - (int)(((float)(PictureEditor.Width - border.Width)) / 2),
-                        y: rect.Y - (int)(((float)(PictureEditor.Height - border.Height)) / 2),
-                        width: rect.Width,
-                        height: rect.Height
-                    );
-
-                return new Area(name, border, rect);
-            }
-
-            AreasViewGrid.Invalidate();
-        }
-
         private void PictureEdit_Paint(object sender, PaintEventArgs e)
         {
-            if (Image is null) return;
 
             ImageBorder = CalcImageBorder();
             ReCalcRectangles();
@@ -272,8 +139,8 @@ namespace Pikda
                 return (
                         new Rectangle
                         (
-                            x: rect.X + (int)(((float)(PictureEditor.Width - border.Width)) / 2),
-                            y: rect.Y + (int)(((float)(PictureEditor.Height - border.Height)) / 2),
+                            x: rect.X + (int)(((float)(cameraControl1.Width - border.Width)) / 2),
+                            y: rect.Y + (int)(((float)(cameraControl1.Height - border.Height)) / 2),
                             width: rect.Width,
                             height: rect.Height
                         ),
@@ -285,19 +152,8 @@ namespace Pikda
 
         private Rectangle CalcImageBorder()
         {
-
-            var wFactor = (double)PictureEditor.Width / PictureEditor.Image.Width;
-            var hFactor = (double)PictureEditor.Height / PictureEditor.Image.Height;
-
-            var (minFactor, isWidthMinFactor) = (wFactor < hFactor ? wFactor : hFactor, (wFactor < hFactor));
-
-            return new Rectangle
-                (
-                    x: isWidthMinFactor ? 0 : (PictureEditor.Width - (int)(PictureEditor.Image.Width * minFactor)) / 2,
-                    y: isWidthMinFactor ? (PictureEditor.Height - (int)(PictureEditor.Image.Height * minFactor)) / 2 : 0,
-                    width: (int)(PictureEditor.Image.Width * minFactor),
-                    height: (int)(PictureEditor.Image.Height * minFactor)
-                );
+            var s = cameraControl1.Size;
+            return new Rectangle(0,0,s.Width,s.Height);
         }
 
         private readonly Panel _picturePanel;
@@ -333,5 +189,7 @@ namespace Pikda
         private Point EndPoint;
 
         #endregion
+
+
     }
 }
