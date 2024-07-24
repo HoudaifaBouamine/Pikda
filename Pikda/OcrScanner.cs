@@ -11,9 +11,16 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Windows.Forms;
+using VisioForge.Core.VideoCapture;
+using VisioForge.Libs.DirectShowLib;
+using VisioForge.Libs.NDI;
 
 namespace Pikda
 {
@@ -23,7 +30,8 @@ namespace Pikda
 
         readonly OcrService ocrService;
         readonly OcrRepository ocrRepository;
-        
+        VideoCaptureCore VideoCaptureCore;
+
         List<AreaViewDto> AreaViewDtos
         {
             get
@@ -35,17 +43,16 @@ namespace Pikda
                     Value = s.Value
                 }).ToList();
 
-                if(AreasViewGrid != null)
+                if (AreasViewGrid != null)
                     AreasViewGrid.DataSource = l;
 
                 return l;
             }
-        } 
+        }
         List<OcrModel> ocrModels = new List<OcrModel>();
 
-        OcrModel currentOcrModel { get;set; }
+        OcrModel currentOcrModel { get; set; }
 
-   
         //private Image Image => PictureEditor.Image;
 
         #endregion
@@ -54,25 +61,102 @@ namespace Pikda
         {
             this.ocrService = new OcrService();
             this.ocrRepository = new OcrRepository();
-   
+
             ocrModels = ocrRepository.GetOcrModels();
             currentOcrModel = ocrModels.FirstOrDefault(o => o.Id == modelId);
             InitializeComponent();
 
             InitializeAreasView();
 
-            
-
             var logitech = CameraControl.GetDevices().FirstOrDefault(x => x.Name.Contains("Webcam"));
             if (logitech != null)
             {
                 cameraControl1.Device = CameraControl.GetDevice(logitech);
             }
+
+            InitializeCameraSettings(cameraControl1.Device);
+        }
+
+        private IAMCameraControl cameraControl;
+        private IAMVideoProcAmp videoProcAmp;
+        
+        private void InitializeCameraSettings(CameraDevice device)
+        {
+
+            // Initialize DirectShow interfaces
+            InitializeDirectShowInterfaces(device);
+
+            // Set initial values for focus, brightness, and sharpness
+            SetCameraProperty(CameraControlProperty.Focus, 150); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 20); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 128); // Example value
+        }
+
+        private void InitializeDirectShowInterfaces(CameraDevice device)
+        {
+            var fieldInfo = typeof(CameraDeviceBase).GetField("sourceFilter", BindingFlags.NonPublic | BindingFlags.Instance);
+            var sourceFilter = fieldInfo.GetValue(device);
+            var filterGraph = new FilterGraph() as IFilterGraph2;
+
+            filterGraph.AddFilter(sourceFilter as IBaseFilter, "Video Capture");
+
+            cameraControl = sourceFilter as IAMCameraControl;
+            videoProcAmp = sourceFilter as IAMVideoProcAmp;
         }
 
 
+        private void SetCameraProperty(CameraControlProperty property, int value, CameraControlFlags flags = CameraControlFlags.Manual)
+        {
+            if (cameraControl != null)
+            {
+                cameraControl.Set(property, value, flags);
+            }
+        }
+
+        private void SetVideoProcAmpProperty(VideoProcAmpProperty property, int value, VideoProcAmpFlags flags = VideoProcAmpFlags.Manual)
+        {
+            if (videoProcAmp != null)
+            {
+                videoProcAmp.Set(property, value, flags);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (cameraControl1.Device != null && cameraControl1.Device.IsRunning)
+                ShowNativeCameraSettings(cameraControl1.Device, this);
+        }
+
+        void ShowNativeCameraSettings(CameraDevice device, Form ownerForm)
+        {
+            // Set properties programmatically here instead of showing UI
+            SetCameraProperty(CameraControlProperty.Focus, 60); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 140); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 150); // Example value
+        }
+
+        [ComImport, Guid("B196B28B-BAB4-101A-B69C-00AA00341D07"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        interface ISpecifyPropertyPages
+        {
+            [PreserveSig]
+            int GetPages(out CAUUID pPages);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CAUUID
+        {
+            public int cElems;
+            public IntPtr pElems;
+        }
+
+        internal static class Import
+        {
+            [DllImport("oleaut32.dll")]
+            public static extern int OleCreatePropertyFrame(IntPtr hwndOwner, int x, int y, [MarshalAs(UnmanagedType.LPWStr)] string caption, int cObjects, [MarshalAs(UnmanagedType.Interface)] ref object ppUnk, int cPages, IntPtr lpPageClsID, int lcid, int dwReserved, IntPtr lpvReserved);
+        }
+
         #region Behaviours
-       
+
         void InitializeAreasView()
         {
             AreasViewGrid.DataSource = AreaViewDtos;
@@ -87,7 +171,6 @@ namespace Pikda
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
             propCol.ColumnEdit = propsLookUp;
         }
-       
 
         private List<AreaViewDto> GetAreas()
         {
@@ -105,7 +188,6 @@ namespace Pikda
 
         private void PictureEdit_Paint(object sender, PaintEventArgs e)
         {
-
             ImageBorder = CalcImageBorder();
             ReCalcRectangles();
 
@@ -126,10 +208,8 @@ namespace Pikda
 
             void ReCalcRectangles()
             {
-
                 var areas = currentOcrModel.Areas;
                 Rectangles = areas.Select(a => GetRectFromAreaDto(ImageBorder, a)).ToList();
-
             }
 
             (Rectangle, string) GetRectFromAreaDto(Rectangle border, Area area)
@@ -137,23 +217,22 @@ namespace Pikda
                 var rect = area.ToRectangle(border);
 
                 return (
-                        new Rectangle
-                        (
-                            x: rect.X + (int)(((float)(cameraControl1.Width - border.Width)) / 2),
-                            y: rect.Y + (int)(((float)(cameraControl1.Height - border.Height)) / 2),
-                            width: rect.Width,
-                            height: rect.Height
-                        ),
-                        area.Name
-                    );
+                    new Rectangle
+                    (
+                        x: rect.X + (int)(((float)(cameraControl1.Width - border.Width)) / 2),
+                        y: rect.Y + (int)(((float)(cameraControl1.Height - border.Height)) / 2),
+                        width: rect.Width,
+                        height: rect.Height
+                    ),
+                    area.Name
+                );
             }
-
         }
 
         private Rectangle CalcImageBorder()
         {
             var s = cameraControl1.Size;
-            return new Rectangle(0,0,s.Width,s.Height);
+            return new Rectangle(0, 0, s.Width, s.Height);
         }
 
         private readonly Panel _picturePanel;
@@ -190,6 +269,11 @@ namespace Pikda
 
         #endregion
 
-
+        private void cameraControl1_MouseClick(object sender, MouseEventArgs e)
+        {
+            var image = (Image)cameraControl1.TakeSnapshot();
+            var text = ocrService.Process(image, "wow", "ara");
+            System.IO.File.AppendAllText("../../Test.txt", "\n\n\n =>=> wow text is :\n\n" + text);
+        }
     }
 }

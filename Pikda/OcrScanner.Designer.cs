@@ -77,6 +77,7 @@
             this.cameraControl1.TabIndex = 1;
             this.cameraControl1.Text = "cameraControl1";
             this.cameraControl1.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
+            this.cameraControl1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cameraControl1_MouseClick);
             // 
             // OcrScannerForm
             // 
