@@ -10,9 +10,14 @@ namespace Pikda
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext()
         {
-            
+            Database.EnsureCreated();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("Server=localhost;Database=Pikda;Username=postgres;Password=postgres");
         }
 
         public DbSet<OcrModel> OcrModels { get; set; }
