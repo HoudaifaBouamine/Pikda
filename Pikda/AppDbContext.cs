@@ -12,6 +12,7 @@ namespace Pikda
     {
         public AppDbContext()
         {
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

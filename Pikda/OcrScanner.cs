@@ -282,7 +282,13 @@ namespace Pikda
 
             var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
             var rect = newArea.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
-            var ocrText = ocrService.Process(Image, rect, "ara");
+
+
+            Image subImage = ((Bitmap) Image).Clone(rect, Image.PixelFormat);
+            var ocrText = ocrService.Process(subImage, "ara");
+    
+
+            subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
 
             Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
             Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");

@@ -104,8 +104,8 @@ namespace Pikda
             {
                 var img = Pix.LoadFromMemory(ImageToByteArray(image));
 
-                img = img.ConvertTo8(0);
-                img = img.BinarizeSauvola(50, 0.35f, false);
+                //img = img.ConvertTo8(0);
+                //img = img.BinarizeSauvola(16, 0.35f, false);
 
                 Page page = default;
 
