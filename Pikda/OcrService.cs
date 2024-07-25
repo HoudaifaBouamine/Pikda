@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using Tesseract;
 
@@ -35,7 +36,6 @@ namespace Pikda
         {
             var fileName = imageName;
             var imagePath = Path.Combine(folderName, fileName);
-            //var proImagePath = Path.Combine("proImages", fileName);
 
             image.Save(imagePath);
 
@@ -80,6 +80,82 @@ namespace Pikda
                 result = page.GetText();
                 return result;
             }
+        }
+
+        public string Process (Image image, Rectangle rect, string lang)
+        {
+            var result = _process(image, lang, new Rect(rect.X, rect.Y, rect.Width, rect.Height));
+
+            return string.IsNullOrWhiteSpace(result) ? "OCR Failed To Read Rectangle" : result;
+        }
+        public string Process(Image image, string lang)
+        {
+            var result = _process(image,lang);
+
+            return string.IsNullOrWhiteSpace(result) ? "OCR Failed To Read Rectangle" : result;
+        }
+
+        private string _process(Image image, string lang)
+        {
+            string tessPath = Path.Combine(trainedDataFolderName, "");
+            string result = "";
+
+            using (var engine = new TesseractEngine(tessPath, lang, EngineMode.Default))
+            {
+                var img = Pix.LoadFromMemory(ImageToByteArray(image));
+
+                img = img.ConvertTo8(0);
+                img = img.BinarizeSauvola(50, 0.35f, false);
+
+                Page page = default;
+
+                try
+                {
+                    page = engine.Process(img);
+                }
+                catch (Exception ex)
+                {
+                    result = ex.Message;
+                    return "error : " + result;
+                }
+                result = page.GetText();
+                return result;
+            }
+
+        }
+        private string _process(Image image, string lang, Rect rect)
+        {
+            string tessPath = Path.Combine(trainedDataFolderName, "");
+            string result = "";
+
+            using (var engine = new TesseractEngine(tessPath, lang, EngineMode.Default))
+            {
+                var img = Pix.LoadFromMemory(ImageToByteArray(image));
+
+                img = img.ConvertTo8(0);
+                img = img.BinarizeSauvola(50, 0.35f, false);
+
+                Page page = default;
+
+                try
+                {
+                    page = engine.Process(img, rect);
+                }
+                catch (Exception ex)
+                {
+                    result = ex.Message;
+                    return "error : " + result;
+                }
+                result = page.GetText();
+                return result;
+            }
+
+        }
+        private static byte[] ImageToByteArray(Image imageIn)
+        {
+            ImageConverter _imageConverter = new ImageConverter();
+            byte[] xByte = (byte[])_imageConverter.ConvertTo(imageIn, typeof(byte[]));
+            return xByte;
         }
         private string _process(string imagePath, string lang)
         {

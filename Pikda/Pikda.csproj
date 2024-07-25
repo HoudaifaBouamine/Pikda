@@ -432,6 +432,7 @@
     <Folder Include="preImages\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Test-Rect.txt" />
     <Content Include="Test.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

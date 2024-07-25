@@ -25,8 +25,9 @@ namespace Pikda
 
         private void btn_AddModel_Click(object sender, EventArgs e)
         {
-            var ocrModel = new OCR_Form(new OcrService(),new OcrRepository());
-            ocrModel.ShowDialog();
+            //var ocrModel = new OCR_Form(new OcrService(),new OcrRepository());
+            var scanner = new OcrScannerForm();
+            scanner.ShowDialog();
         }
     }
 }

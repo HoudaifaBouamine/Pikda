@@ -41,9 +41,12 @@ namespace Pikda
 
             list.ForEach(o =>
             {
-                var reader = new FileStream(o.ImageUrl, FileMode.Open);
-                o.InitImage(Image.FromStream(reader));
-                reader.Close();
+                if(o.ImageUrl != null)
+                {
+                    var reader = new FileStream(o.ImageUrl, FileMode.Open);
+                    o.InitImage(Image.FromStream(reader));
+                    reader.Close();
+                }
             });
 
             return list;
@@ -63,7 +66,6 @@ namespace Pikda
 
             await db.SaveChangesAsync();
         }
-
         public void UpdateOcrModel(OcrModel model)
         {
             if (model.Image != null)

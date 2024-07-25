@@ -31,7 +31,7 @@
             this.LayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.AreasViewGrid = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.cameraControl1 = new DevExpress.XtraEditors.Camera.CameraControl();
+            this.camera = new DevExpress.XtraEditors.Camera.CameraControl();
             this.LayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
@@ -43,7 +43,7 @@
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 977F));
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 8F));
             this.LayoutPanel.Controls.Add(this.AreasViewGrid, 1, 0);
-            this.LayoutPanel.Controls.Add(this.cameraControl1, 0, 0);
+            this.LayoutPanel.Controls.Add(this.camera, 0, 0);
             this.LayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.LayoutPanel.Name = "LayoutPanel";
@@ -68,16 +68,19 @@
             this.gridView1.GridControl = this.AreasViewGrid;
             this.gridView1.Name = "gridView1";
             // 
-            // cameraControl1
+            // camera
             // 
-            this.cameraControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cameraControl1.Location = new System.Drawing.Point(3, 3);
-            this.cameraControl1.Name = "cameraControl1";
-            this.cameraControl1.Size = new System.Drawing.Size(971, 560);
-            this.cameraControl1.TabIndex = 1;
-            this.cameraControl1.Text = "cameraControl1";
-            this.cameraControl1.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
-            this.cameraControl1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cameraControl1_MouseClick);
+            this.camera.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.camera.Location = new System.Drawing.Point(3, 3);
+            this.camera.Name = "camera";
+            this.camera.Size = new System.Drawing.Size(971, 560);
+            this.camera.TabIndex = 1;
+            this.camera.Text = "cameraControl1";
+            this.camera.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
+            this.camera.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cameraControl1_MouseClick);
+            this.camera.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseDown);
+            this.camera.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
+            this.camera.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);
             // 
             // OcrScannerForm
             // 
@@ -88,6 +91,8 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "OcrScannerForm";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.OcrScannerForm_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.OcrScannerForm_Paint);
             this.LayoutPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
@@ -100,7 +105,7 @@
         private System.Windows.Forms.TableLayoutPanel LayoutPanel;
         private DevExpress.XtraGrid.GridControl AreasViewGrid;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
-        private DevExpress.XtraEditors.Camera.CameraControl cameraControl1;
+        private DevExpress.XtraEditors.Camera.CameraControl camera;
     }
 }
 
