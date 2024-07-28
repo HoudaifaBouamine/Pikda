@@ -28,6 +28,7 @@ namespace Pikda
             //var ocrModel = new OCR_Form(new OcrService(),new OcrRepository());
             var scanner = new OcrScannerForm();
             scanner.ShowDialog();
+            scanner.Dispose();
         }
     }
 }
