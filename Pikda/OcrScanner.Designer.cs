@@ -30,13 +30,10 @@
         {
             this.LayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.AreasViewGrid = new DevExpress.XtraGrid.GridControl();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.camera = new DevExpress.XtraEditors.Camera.CameraControl();
-            this.gridColumn1 = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gridColumn2 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.LayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
+            
             this.SuspendLayout();
             // 
             // LayoutPanel
@@ -58,20 +55,9 @@
             // 
             this.AreasViewGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.AreasViewGrid.Location = new System.Drawing.Point(980, 3);
-            this.AreasViewGrid.MainView = this.gridView1;
             this.AreasViewGrid.Name = "AreasViewGrid";
             this.AreasViewGrid.Size = new System.Drawing.Size(247, 560);
             this.AreasViewGrid.TabIndex = 0;
-            this.AreasViewGrid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridView1});
-            // 
-            // gridView1
-            // 
-            this.gridView1.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
-            this.gridColumn1,
-            this.gridColumn2});
-            this.gridView1.GridControl = this.AreasViewGrid;
-            this.gridView1.Name = "gridView1";
             // 
             // camera
             // 
@@ -87,22 +73,6 @@
             this.camera.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
             this.camera.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);
             // 
-            // gridColumn1
-            // 
-            this.gridColumn1.MinWidth = 25;
-            this.gridColumn1.Name = "gridColumn1";
-            this.gridColumn1.Visible = true;
-            this.gridColumn1.VisibleIndex = 0;
-            this.gridColumn1.Width = 94;
-            // 
-            // gridColumn2
-            // 
-            this.gridColumn2.MinWidth = 25;
-            this.gridColumn2.Name = "gridColumn2";
-            this.gridColumn2.Visible = true;
-            this.gridColumn2.VisibleIndex = 1;
-            this.gridColumn2.Width = 94;
-            // 
             // OcrScannerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -116,7 +86,6 @@
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.OcrScannerForm_Paint);
             this.LayoutPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -125,10 +94,7 @@
 
         private System.Windows.Forms.TableLayoutPanel LayoutPanel;
         private DevExpress.XtraGrid.GridControl AreasViewGrid;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private DevExpress.XtraEditors.Camera.CameraControl camera;
-        private DevExpress.XtraGrid.Columns.GridColumn gridColumn1;
-        private DevExpress.XtraGrid.Columns.GridColumn gridColumn2;
     }
 }
 
