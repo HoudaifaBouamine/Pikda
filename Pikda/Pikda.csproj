@@ -359,7 +359,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppDbContext.cs" />
+    <Compile Include="Data\AppDbContext.cs" />
+    <Compile Include="Dtos\AreaViewClientDto.cs" />
     <Compile Include="Dtos\AreaViewDto.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -368,11 +369,11 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\IOcrObject.cs" />
-    <Compile Include="OcrCardScanerForm.cs">
+    <Compile Include="OcrScannerClient.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="OcrCardScanerForm.Designer.cs">
-      <DependentUpon>OcrCardScanerForm.cs</DependentUpon>
+    <Compile Include="OcrScannerClient.Designer.cs">
+      <DependentUpon>OcrScannerClient.cs</DependentUpon>
     </Compile>
     <Compile Include="OcrScanner.cs">
       <SubType>Form</SubType>
@@ -380,29 +381,20 @@
     <Compile Include="OcrScanner.Designer.cs">
       <DependentUpon>OcrScanner.cs</DependentUpon>
     </Compile>
-    <Compile Include="OCR_Form.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="OCR_Form.Designer.cs">
-      <DependentUpon>OCR_Form.cs</DependentUpon>
-    </Compile>
     <Compile Include="Models\Area.cs" />
     <Compile Include="Models\OcrModel.cs" />
-    <Compile Include="OcrRepository.cs" />
-    <Compile Include="OcrService.cs" />
+    <Compile Include="Repositories\OcrRepository.cs" />
+    <Compile Include="Services\OcrService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="OcrCardScanerForm.resx">
-      <DependentUpon>OcrCardScanerForm.cs</DependentUpon>
+    <EmbeddedResource Include="OcrScannerClient.resx">
+      <DependentUpon>OcrScannerClient.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OcrScanner.resx">
       <DependentUpon>OcrScanner.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OCR_Form.resx">
-      <DependentUpon>OCR_Form.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -427,10 +419,7 @@
     </Compile>
     <None Include="tessdata\ara.traineddata" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\" />
-    <Folder Include="preImages\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Test-Rect.txt" />
     <Content Include="Test.txt" />

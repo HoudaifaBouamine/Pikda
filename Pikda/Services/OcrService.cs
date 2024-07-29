@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using Tesseract;
 
@@ -8,7 +7,7 @@ namespace Pikda
 {
     public class OcrService
     {
-        public const string folderName = "..\\..\\Images";
+        public const string folderName = "Images";
         public const string trainedDataFolderName = "..\\..\\tessdata";
 
         public string Process(string imagePath, Rectangle rect, string lang)
