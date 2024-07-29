@@ -532,11 +532,7 @@ namespace Pikda
         {
             StartTime = DateTime.Now;
 
-            if (!Loading)
-            {
-                Loading = true;
-                InitializeAreasView();
-            }
+            
 
 
             if (currentOcrModel == null)
@@ -594,6 +590,15 @@ namespace Pikda
         private void LayoutPanel_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void btn_ReRead_Click(object sender, EventArgs e)
+        {
+            if (!Loading)
+            {
+                Loading = true;
+                InitializeAreasView();
+            }
         }
     }
 }

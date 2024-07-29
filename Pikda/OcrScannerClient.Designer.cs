@@ -31,10 +31,14 @@ namespace Pikda
         private void InitializeComponent()
         {
             this.LayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.camera = new DevExpress.XtraEditors.Camera.CameraControl();
+            this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
             this.AreasViewGrid = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.camera = new DevExpress.XtraEditors.Camera.CameraControl();
+            this.btn_ReRead = new System.Windows.Forms.Button();
             this.LayoutPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
+            this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             this.SuspendLayout();
@@ -44,8 +48,8 @@ namespace Pikda
             this.LayoutPanel.ColumnCount = 2;
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 958F));
             this.LayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
-            this.LayoutPanel.Controls.Add(this.AreasViewGrid, 1, 0);
             this.LayoutPanel.Controls.Add(this.camera, 0, 0);
+            this.LayoutPanel.Controls.Add(this.panelControl1, 1, 0);
             this.LayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.LayoutPanel.Name = "LayoutPanel";
@@ -54,22 +58,6 @@ namespace Pikda
             this.LayoutPanel.Size = new System.Drawing.Size(1230, 566);
             this.LayoutPanel.TabIndex = 0;
             this.LayoutPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.LayoutPanel_Paint);
-            // 
-            // AreasViewGrid
-            // 
-            this.AreasViewGrid.Dock = System.Windows.Forms.DockStyle.Top;
-            this.AreasViewGrid.Location = new System.Drawing.Point(961, 3);
-            this.AreasViewGrid.MainView = this.gridView1;
-            this.AreasViewGrid.Name = "AreasViewGrid";
-            this.AreasViewGrid.Size = new System.Drawing.Size(266, 487);
-            this.AreasViewGrid.TabIndex = 0;
-            this.AreasViewGrid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridView1});
-            // 
-            // gridView1
-            // 
-            this.gridView1.GridControl = this.AreasViewGrid;
-            this.gridView1.Name = "gridView1";
             // 
             // camera
             // 
@@ -85,6 +73,43 @@ namespace Pikda
             this.camera.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
             this.camera.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);
             // 
+            // panelControl1
+            // 
+            this.panelControl1.Controls.Add(this.btn_ReRead);
+            this.panelControl1.Controls.Add(this.AreasViewGrid);
+            this.panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelControl1.Location = new System.Drawing.Point(961, 3);
+            this.panelControl1.Name = "panelControl1";
+            this.panelControl1.Size = new System.Drawing.Size(266, 560);
+            this.panelControl1.TabIndex = 2;
+            // 
+            // AreasViewGrid
+            // 
+            this.AreasViewGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.AreasViewGrid.Location = new System.Drawing.Point(2, 2);
+            this.AreasViewGrid.MainView = this.gridView1;
+            this.AreasViewGrid.Name = "AreasViewGrid";
+            this.AreasViewGrid.Size = new System.Drawing.Size(262, 556);
+            this.AreasViewGrid.TabIndex = 1;
+            this.AreasViewGrid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridView1});
+            // 
+            // gridView1
+            // 
+            this.gridView1.GridControl = this.AreasViewGrid;
+            this.gridView1.Name = "gridView1";
+            // 
+            // btn_ReRead
+            // 
+            this.btn_ReRead.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btn_ReRead.Location = new System.Drawing.Point(2, 514);
+            this.btn_ReRead.Name = "btn_ReRead";
+            this.btn_ReRead.Size = new System.Drawing.Size(262, 44);
+            this.btn_ReRead.TabIndex = 2;
+            this.btn_ReRead.Text = "Read Again";
+            this.btn_ReRead.UseVisualStyleBackColor = true;
+            this.btn_ReRead.Click += new System.EventHandler(this.btn_ReRead_Click);
+            // 
             // OcrScannerClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -99,6 +124,8 @@ namespace Pikda
             this.Shown += new System.EventHandler(this.OcrScannerClientForm_Shown);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.OcrScannerForm_Paint);
             this.LayoutPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
+            this.panelControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             this.ResumeLayout(false);
@@ -108,8 +135,10 @@ namespace Pikda
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel LayoutPanel;
-        private DevExpress.XtraGrid.GridControl AreasViewGrid;
         private DevExpress.XtraEditors.Camera.CameraControl camera;
+        private DevExpress.XtraEditors.PanelControl panelControl1;
+        private Button btn_ReRead;
+        private DevExpress.XtraGrid.GridControl AreasViewGrid;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
     }
 }
