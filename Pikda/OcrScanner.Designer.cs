@@ -1,4 +1,6 @@
-﻿namespace Pikda
+﻿using System.Windows.Forms;
+
+namespace Pikda
 {
     partial class OcrScannerForm
     {
@@ -84,6 +86,7 @@
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.OcrScannerForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.OcrScannerForm_Paint);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ClosingFun);
             this.LayoutPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AreasViewGrid)).EndInit();
             this.ResumeLayout(false);
