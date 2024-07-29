@@ -34,7 +34,8 @@ namespace Pikda
                 var l = currentOcrModel.Areas.Select(s => new AreaViewDto
                 {
                     Prop = s.Name,
-                    Value = s.Value
+                    Value = s.Value,
+                    PlaceHolder = s.Placeholder,
                 }).ToList();
 
                 if (AreasViewGrid != null)
@@ -82,12 +83,10 @@ namespace Pikda
                 XtraInputBoxArgs args = new XtraInputBoxArgs();
 
                 ComboBoxEdit cbEdit = new ComboBoxEdit();
-                cbEdit.Properties.Items.Add("FirstName");
-                cbEdit.Properties.Items.Add("LastName");
-                cbEdit.Properties.Items.Add("BirthDate");
+                cbEdit.Properties.Items.AddRange(Props);
 
-                args.Caption = "Adding New Property";
-                args.Prompt = "Property Name";
+                args.Caption = "Enter new model name";
+                args.Prompt = "Model Name";
                 args.DefaultButtonIndex = 0;
 
                 args.Editor = cbEdit;
@@ -172,8 +171,8 @@ namespace Pikda
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (camera.Device != null && camera.Device.IsRunning)
-                ShowNativeCameraSettings(camera.Device, this);
+            //if (camera.Device != null && camera.Device.IsRunning)
+            //    ShowNativeCameraSettings(camera.Device, this);
         }
 
         void ShowNativeCameraSettings(CameraDevice device, Form ownerForm)
@@ -258,9 +257,7 @@ namespace Pikda
             XtraInputBoxArgs args = new XtraInputBoxArgs();
 
             ComboBoxEdit cbEdit = new ComboBoxEdit();
-            cbEdit.Properties.Items.Add("FirstName");
-            cbEdit.Properties.Items.Add("LastName");
-            cbEdit.Properties.Items.Add("BirthDate");
+            cbEdit.Properties.Items.AddRange(Props);
 
             args.Caption = "Adding New Property";
             args.Prompt = "Property Name";
@@ -281,6 +278,7 @@ namespace Pikda
 
 
             var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
+            
             var rect = newArea.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
 
 
@@ -288,43 +286,61 @@ namespace Pikda
             var ocrText = ocrService.Process(subImage, "ara");
     
 
-            subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
+            //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
 
-            Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
-            Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");
-            Console.WriteLine($"\nImage border x:{ImageBorder.X} y:{ImageBorder.Y} w: {ImageBorder.Width}, h : {ImageBorder.Height}");
-            Console.WriteLine($"\nReal Rect x:{rect.X} y:{rect.Y} w:{rect.Width} h:{rect.Height}");
-            Console.WriteLine($"\nShown Rect x:{CurrentRect.X} y:{CurrentRect.Y} w:{CurrentRect.Width} h:{CurrentRect.Height}");
+            //Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
+            //Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");
+            //Console.WriteLine($"\nImage border x:{ImageBorder.X} y:{ImageBorder.Y} w: {ImageBorder.Width}, h : {ImageBorder.Height}");
+            //Console.WriteLine($"\nReal Rect x:{rect.X} y:{rect.Y} w:{rect.Width} h:{rect.Height}");
+            //Console.WriteLine($"\nShown Rect x:{CurrentRect.X} y:{CurrentRect.Y} w:{CurrentRect.Width} h:{CurrentRect.Height}");
 
             newArea.Value = ocrText;
             currentOcrModel.AddArea(newArea);
-            ocrRepository.UpdateOcrModel(currentOcrModel);
-            Console.WriteLine("ocr areas count : " + currentOcrModel.Areas.Count());
+
+            UpdateOcrModelInDb();
+
             Rectangles.Add((CurrentRect, result));
 
             AreasViewGrid.DataSource = GetAreas();
-
+       
             StartPoint = UnDefinedPoint;
             CurrentRect = UnDefinedRect;
 
-            Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle r)
-            {
-                r = new Rectangle
-                (
-                        x: r.X - (int)(((float)(camera.Width - border.Width + 1)) / 2),
-                        y: r.Y - (int)(((float)(camera.Height - border.Height + 1)) / 2),
-                        width: r.Width,
-                        height: r.Height
-                );
-
-                return new Area(name, border, r);
-            }
-
+            
             AreasViewGrid.Invalidate();
         }
+
+        Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle r)
+        {
+            r = new Rectangle
+            (
+                    x: r.X - (int)(((float)(camera.Width - border.Width + 1)) / 2),
+                    y: r.Y - (int)(((float)(camera.Height - border.Height + 1)) / 2),
+                    width: r.Width,
+                    height: r.Height
+            );
+
+            return new Area(name, border, r);
+        }
+
         #endregion
 
         #region Behaviours
+
+        void UpdateOcrModelInDb()
+        {
+            var areaView = AreasViewGrid.DataSource as List<AreaViewDto>;
+
+            currentOcrModel.Areas.ForEach(a =>
+            {
+                var areaRow = areaView.FirstOrDefault(b => b.Prop == a.Name);
+                if (areaRow is null) return;
+
+                a.Placeholder = areaRow.PlaceHolder;
+            });
+
+            ocrRepository.UpdateOcrModel(currentOcrModel);
+        }
 
         void InitializeAreasView()
         {
@@ -336,10 +352,12 @@ namespace Pikda
             var valCol = view.Columns["Value"];
 
             var propsLookUp = new RepositoryItemLookUpEdit();
-            propsLookUp.DataSource = new string[] { "FirstName", "LastName", "BirthDay" };
+            propsLookUp.DataSource = Props;
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
             propCol.ColumnEdit = propsLookUp;
         }
+
+        private string[] Props = new string[] { "FirstName", "LastName", "BirthDay","CardNumber", "Gender", "BloadType", "Image" };
 
         private List<AreaViewDto> GetAreas()
         {
@@ -347,7 +365,8 @@ namespace Pikda
             return currentOcrModel.Areas.Select(s => new AreaViewDto
             {
                 Prop = s.Name,
-                Value = s.Value
+                Value = s.Value,
+                PlaceHolder = s.Placeholder,
             }).ToList();
         }
 
@@ -533,6 +552,11 @@ namespace Pikda
                     Console.WriteLine("wow");
                 }
             }
+        }
+
+        private void ClosingFun(object sender, EventArgs e)
+        {
+            UpdateOcrModelInDb();
         }
     }
 }
