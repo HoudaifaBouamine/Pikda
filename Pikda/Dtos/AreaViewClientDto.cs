@@ -4,6 +4,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VisioForge.Libs.MediaFoundation;
 
 namespace Pikda.Dtos
 {
@@ -16,10 +17,21 @@ namespace Pikda.Dtos
         {
             get
             {
-                if (string.IsNullOrEmpty(_placeHolder)) 
-                    return _value_without_placeholder.Trim();
+                if (string.IsNullOrEmpty(_placeHolder))
+                    return _value_without_placeholder
+                        .Replace(": ", ":")
+                        .Replace(" :", ":")
+                        .Replace(". ", ".")
+                        .Replace(" .", ".")
+                        .Trim(new char[] { ' ', ':' });
 
-                return _value_without_placeholder.Replace(_placeHolder, string.Empty).Trim();
+                return _value_without_placeholder
+                    .Replace(_placeHolder, string.Empty)
+                    .Replace(": ", ":")
+                    .Replace(" :", ":")
+                    .Replace(". ", ".")
+                    .Replace(" .", ".")
+                    .Trim(new char[] { ' ', ':' });
             }
             set
             {

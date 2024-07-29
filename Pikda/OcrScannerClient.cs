@@ -12,10 +12,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using VisioForge.Core.VideoCapture;
 using VisioForge.Libs.DirectShowLib;
+using VisioForge.Libs.ZXing;
 
 namespace Pikda
 {
@@ -23,22 +26,32 @@ namespace Pikda
     {
         #region State
 
-        readonly OcrService ocrService;
-        readonly OcrRepository ocrRepository;
+        readonly OcrService ocrService = new OcrService();
+        readonly OcrRepository ocrRepository = new OcrRepository();
         VideoCaptureCore VideoCaptureCore;
         private Image Image { get => camera.TakeSnapshot(); }
+
+        bool Loading = true;
+
+        List<AreaViewClientDto> list = null;
         List<AreaViewClientDto> AreaViewDtos
         {
             get
             {
-                if (currentOcrModel == null) return new List<AreaViewClientDto>();
-                
-                var l = currentOcrModel.Areas.Select(s =>
+                Console.WriteLine("wowooowowowo");
+                if (list != null && Loading == false) return list;
+
+                if (currentOcrModel == null || ocrService is null || camera is null) return new List<AreaViewClientDto>();
+
+                list = currentOcrModel.Areas.Select(s =>
                 {
+                    var cameraIsLoading = camera.TakeSnapshot() == null;
+                    Loading = cameraIsLoading && (StartTime == null || DateTime.Now < StartTime + TimeSpan.FromMilliseconds(100));
+
                     var area = new AreaViewClientDto
                     {
                         Prop = s.Name,
-                        Value = s.Value,
+                        Value = Loading ? "Loading..." : GetTextFromRect(s)
                     };
 
                     area.SetPlaceholder(s.Placeholder);
@@ -48,9 +61,9 @@ namespace Pikda
                 }).ToList();
 
                 if (AreasViewGrid != null)
-                    AreasViewGrid.DataSource = l;
+                    AreasViewGrid.DataSource = list;
 
-                return l;
+                return list;
             }
         }
         List<OcrModel> ocrModels = new List<OcrModel>();
@@ -61,8 +74,7 @@ namespace Pikda
 
         public OcrScannerClientForm(int modelId)
         {
-            this.ocrService = new OcrService();
-            this.ocrRepository = new OcrRepository();
+            
 
             ocrModels = ocrRepository.GetOcrModels();
             currentOcrModel = ocrModels.FirstOrDefault(o => o.Id == modelId);
@@ -113,6 +125,7 @@ namespace Pikda
                 camera.Device = CameraControl.GetDevice(logitech);
             }
 
+            InitializeCameraSettings(camera.Device);
         }
 
         private IAMCameraControl cameraControl;
@@ -475,6 +488,19 @@ namespace Pikda
 
         #endregion
 
+        private string GetTextFromRect(Area area)
+        {
+
+            var image = (Image)camera.TakeSnapshot();
+
+            if (image == null) return "Image Not Loaded";
+
+            var rect = area.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
+            Image subImage = ((Bitmap)image).Clone(rect, image.PixelFormat);
+            var ocrText = ocrService.Process(subImage, "ara");
+
+            return ocrText;
+        }
         private void cameraControl1_MouseClick(object sender, MouseEventArgs e)
         {
             if (currentOcrModel == null) return;
@@ -497,12 +523,22 @@ namespace Pikda
 
         private void OcrScannerForm_Load(object sender, EventArgs e)
         {
-            InitializeCameraSettings(camera.Device);
+            //InitializeCameraSettings(camera.Device);
 
         }
 
+        DateTime? StartTime = null;
         private async void OcrScannerForm_Paint(object sender, PaintEventArgs e)
         {
+            StartTime = DateTime.Now;
+
+            if (!Loading)
+            {
+                Loading = true;
+                InitializeAreasView();
+            }
+
+
             if (currentOcrModel == null)
             {
                 XtraInputBoxArgs args = new XtraInputBoxArgs();
@@ -548,6 +584,16 @@ namespace Pikda
         private void ClosingFun(object sender, EventArgs e)
         {
             UpdateOcrModelInDb();
+        }
+
+        private void OcrScannerClientForm_Shown(object sender, EventArgs e)
+        {
+            InitializeAreasView();
+        }
+
+        private void LayoutPanel_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

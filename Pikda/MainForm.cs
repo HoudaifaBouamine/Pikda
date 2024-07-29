@@ -19,8 +19,9 @@ namespace Pikda
 
         private void btn_ScanCard_Click(object sender, EventArgs e)
         {
-            var scanner = new OcrScannerClientForm(9);
+            var scanner = new OcrScannerClientForm(13);
             scanner.ShowDialog();
+            scanner.Dispose();
         }
 
         private void btn_AddModel_Click(object sender, EventArgs e)
