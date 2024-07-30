@@ -30,6 +30,7 @@
         {
             this.btn_ScanCard = new System.Windows.Forms.Button();
             this.btn_AddModel = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // btn_ScanCard
@@ -52,15 +53,25 @@
             this.btn_AddModel.UseVisualStyleBackColor = true;
             this.btn_AddModel.Click += new System.EventHandler(this.btn_AddModel_Click);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(39, 147);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(149, 24);
+            this.comboBox1.TabIndex = 2;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.btn_AddModel);
             this.Controls.Add(this.btn_ScanCard);
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
 
         }
@@ -69,5 +80,6 @@
 
         private System.Windows.Forms.Button btn_ScanCard;
         private System.Windows.Forms.Button btn_AddModel;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }

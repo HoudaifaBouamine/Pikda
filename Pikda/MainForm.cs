@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pikda.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,7 +20,8 @@ namespace Pikda
 
         private void btn_ScanCard_Click(object sender, EventArgs e)
         {
-            var scanner = new OcrScannerClientForm(13);
+            Console.WriteLine("cmb item => " + comboBox1.SelectedItem.ToString());
+            var scanner = new OcrScannerClientForm(wow.FirstOrDefault(w=>w.Name == comboBox1.SelectedItem.ToString()).Id);
             scanner.ShowDialog();
             scanner.Dispose();
         }
@@ -31,5 +33,15 @@ namespace Pikda
             scanner.ShowDialog();
             scanner.Dispose();
         }
+
+        List<OcrModel> wow;
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            var db = new AppDbContext();
+            wow = db.OcrModels.ToList();
+            comboBox1.Items.AddRange(wow.Select(w=>w.Name).ToArray());
+            
+        }
+
     }
 }
