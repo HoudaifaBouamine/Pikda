@@ -579,8 +579,122 @@ namespace Pikda
 
         private void ClosingFun(object sender, EventArgs e)
         {
-            UpdateOcrModelInDb();
+            //UpdateOcrModelInDb();
+            Image image = null;
+            string error = "";
+            try
+            {
+                image = Image.FromFile(list.Where(a => a.Prop == "Image").FirstOrDefault()?.Value);
+            }
+            catch (Exception ex)
+            {
+                error += "\n" + ex.Message;
+                image = null;
+            }
+
+            DateTime birthDate;
+
+            try
+            {
+                birthDate = GetBirthDateFromIdCard();
+                if
+                    (
+                        birthDate == null ||
+                        birthDate == default ||
+                        DateTime.Now.Subtract(new TimeSpan(100 * 365,0,0,0)) > birthDate ||
+                        DateTime.Now < birthDate
+                    )
+                {
+                    error += "\nBirth Date faild to be parsed";
+                }
+
+            }
+            catch (Exception ex) 
+            {
+                error += "\n"  +ex.Message;
+                birthDate = default;
+            }
+
+            OcrObject = new OcrObject
+            {
+                FirstName = list.Where(a => a.Prop == "FirstName").FirstOrDefault()?.Value,
+                LastName = list.Where(a => a.Prop == "LastName").FirstOrDefault()?.Value,
+                BirthDate = birthDate,
+                BloodType = GetBloodTypeFromIdCard(),
+                CardNumber = list.Where(a => a.Prop == "CardNumber").FirstOrDefault()?.Value,
+                Gender = GetGenderFromIdCard(),
+                Image = image,
+                ErrorMessage = error,
+                Result = true
+            };
+
+            Gender GetGenderFromIdCard()
+            {
+                var genderAsString = list.Where(a => a.Prop == "Gender").FirstOrDefault()?.Value;
+
+                switch (genderAsString)
+                {
+                    case "ذكر":
+                        return Gender.Male;
+                    case "أنثى":
+                        return Gender.Female;
+                    
+                    default:
+                        return Gender.NotDefined;
+                }
+            }
+
+            BloodType GetBloodTypeFromIdCard()
+            {
+                var bloodTypeAsString = list.Where(a => a.Prop == "BloodType").FirstOrDefault()?.Value;
+
+                switch (bloodTypeAsString)
+                {
+                    case "A+":
+                        return BloodType.APositive;
+
+                    case "A-":
+                        return BloodType.ANegative;
+
+                    case "B+":
+                        return BloodType.BPositive;
+
+                    case "B-":
+                        return BloodType.BNegative;
+
+                    case "AB+":
+                        return BloodType.AbPositive;
+
+                    case "AB-":
+                        return BloodType.AbNegative;
+
+                    case "O+":
+                        return BloodType.OPositive;
+
+                    case "O-":
+                        return BloodType.ONegative;
+
+                    default:
+                        return BloodType.NotDefined;
+                }
+            }
+
+            DateTime GetBirthDateFromIdCard()
+            {
+                var parts = list.Where(a => a.Prop == "BirthDay").FirstOrDefault()?.Value.Split('.');
+                if (parts == null) return default;
+                return new DateTime
+                    (
+                        year: Convert.ToInt32(parts[0]),
+                        month: Convert.ToInt32(parts[1]),
+                        day: Convert.ToInt32(parts[2])
+                    );
+            }
         }
+
+
+        public OcrObject OcrObject { get; set; }
+
 
         private void OcrScannerClientForm_Shown(object sender, EventArgs e)
         {

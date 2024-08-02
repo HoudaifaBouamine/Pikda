@@ -24,7 +24,12 @@ namespace Pikda
             var scanner = new OcrScannerClientForm(wow.FirstOrDefault(w=>w.Name == comboBox1.SelectedItem.ToString()).Id);
             scanner.ShowDialog();
             
+            var ocrObject = scanner.OcrObject;
+
             scanner.Dispose();
+
+            Console.WriteLine("\n -> birth date    : " + ocrObject.BirthDate);
+            Console.WriteLine("\n -> error message : " + ocrObject.ErrorMessage);
         }
 
         private void btn_AddModel_Click(object sender, EventArgs e)

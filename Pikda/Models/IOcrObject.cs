@@ -60,3 +60,16 @@ public enum BloodType : short
     [Description("AB -")]
     AbNegative
 }
+
+public class OcrObject : IOcrObject
+{
+    public string LastName { get; set; }
+    public string FirstName { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public Gender Gender { get; set; }
+    public BloodType BloodType { get; set; }
+    public string CardNumber { get; set; }
+    public Image Image { get; set; }
+    public bool Result { get; set; }
+    public string ErrorMessage { get; set; }
+}
