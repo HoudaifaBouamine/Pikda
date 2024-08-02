@@ -38,5 +38,6 @@ namespace Pikda.Dtos
             }
         }
         public string PlaceHolder { get; set; } = string.Empty;
+        public string Language { get; set; }
     }
 }

@@ -285,7 +285,7 @@ namespace Pikda
 
 
             Image subImage = ((Bitmap) Image).Clone(rect, Image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, "ara");
+            var ocrText = ocrService.Process(subImage, newArea.Language);
     
 
             //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
@@ -497,7 +497,7 @@ namespace Pikda
 
             var rect = area.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
             Image subImage = ((Bitmap)image).Clone(rect, image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, "ara");
+            var ocrText = ocrService.Process(subImage, area.Language);
 
             return ocrText;
         }

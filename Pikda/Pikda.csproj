@@ -418,6 +418,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="tessdata\ara.traineddata" />
+    <None Include="tessdata\eng.traineddata" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

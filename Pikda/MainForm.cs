@@ -23,6 +23,7 @@ namespace Pikda
             Console.WriteLine("cmb item => " + comboBox1.SelectedItem.ToString());
             var scanner = new OcrScannerClientForm(wow.FirstOrDefault(w=>w.Name == comboBox1.SelectedItem.ToString()).Id);
             scanner.ShowDialog();
+            
             scanner.Dispose();
         }
 

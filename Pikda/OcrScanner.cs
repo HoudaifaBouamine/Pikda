@@ -36,6 +36,7 @@ namespace Pikda
                     Prop = s.Name,
                     Value = s.Value,
                     PlaceHolder = s.Placeholder,
+                    Language = s.Language
                 }).ToList();
 
                 if (AreasViewGrid != null)
@@ -283,7 +284,7 @@ namespace Pikda
 
 
             Image subImage = ((Bitmap) Image).Clone(rect, Image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, "ara");
+            var ocrText = ocrService.Process(subImage, newArea.Language);
     
 
             //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
@@ -337,6 +338,7 @@ namespace Pikda
                 if (areaRow is null) return;
 
                 a.Placeholder = areaRow.PlaceHolder;
+                a.Language = areaRow.Language;
             });
 
             ocrRepository.UpdateOcrModel(currentOcrModel);
@@ -350,14 +352,34 @@ namespace Pikda
 
             var propCol = view.Columns["Prop"];
             var valCol = view.Columns["Value"];
+            var langCol = view.Columns["Language"];
 
             var propsLookUp = new RepositoryItemLookUpEdit();
             propsLookUp.DataSource = Props;
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
             propCol.ColumnEdit = propsLookUp;
+
+            var langsLookUp = new RepositoryItemLookUpEdit();
+            langsLookUp.DataSource = Languages;
+            AreasViewGrid.RepositoryItems.Add(langsLookUp);
+            langCol.ColumnEdit = langsLookUp;
+
+            langsLookUp.SelectionChanged += LangsLookUp_SelectionChanged;
+        }
+
+        private void LangsLookUp_SelectionChanged(object sender, DevExpress.XtraEditors.Controls.PopupSelectionChangedEventArgs e)
+        {
+            var wow = (AreaViewDto)AreasViewGrid.ViewCollection[e.RecordIndex].DataSource;
+            Console.WriteLine("wow => " + wow.Prop);
+
+            var name = wow.Prop;
+
+            var area = currentOcrModel.Areas.Where(a => a.Name == name).First();
+            area.Language = wow.Language;
         }
 
         private string[] Props = new string[] { "FirstName", "LastName", "BirthDay","CardNumber", "Gender", "BloadType", "Image" };
+        private string[] Languages = new string[] { "ara", "eng" };
 
         private List<AreaViewDto> GetAreas()
         {
@@ -367,9 +389,10 @@ namespace Pikda
                 Prop = s.Name,
                 Value = s.Value,
                 PlaceHolder = s.Placeholder,
+                Language = s.Language
             }).ToList();
         }
-
+        
         #endregion
 
         #region Drawing
@@ -557,6 +580,34 @@ namespace Pikda
         private void ClosingFun(object sender, EventArgs e)
         {
             UpdateOcrModelInDb();
+        }
+
+        private void LayoutPanel_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void AreasViewGrid_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btn_Refresh_Click(object sender, EventArgs e)
+        {
+            var image = Image;
+
+
+            
+            UpdateOcrModelInDb();
+            currentOcrModel.Areas.ForEach(a =>
+            {
+                var rect = a.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
+
+                Image subImage = ((Bitmap)image).Clone(rect, Image.PixelFormat);
+
+                a.Value = ocrService.Process(subImage, a.Language);
+            });
+            InitializeAreasView();
         }
     }
 }
