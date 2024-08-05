@@ -357,6 +357,8 @@ namespace Pikda
 
             var propsLookUp = new RepositoryItemLookUpEdit();
             propsLookUp.DataSource = Props;
+            propsLookUp.ReadOnly = true;
+
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
             propCol.ColumnEdit = propsLookUp;
         }

@@ -84,7 +84,7 @@ namespace Pikda
                 XtraInputBoxArgs args = new XtraInputBoxArgs();
 
                 ComboBoxEdit cbEdit = new ComboBoxEdit();
-                cbEdit.Properties.Items.AddRange(Props);
+                cbEdit.Properties.Items.AddRange(Props2);
 
                 args.Caption = "Enter new model name";
                 args.Prompt = "Model Name";
@@ -277,9 +277,12 @@ namespace Pikda
                 return;
             }
 
+            Props.Remove(result);
 
             var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
-            
+
+            SetDefaultLanguageAndPlaceHoldersForIdCard(newArea);
+
             var rect = newArea.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
 
 
@@ -309,6 +312,44 @@ namespace Pikda
 
             
             AreasViewGrid.Invalidate();
+        }
+
+        void SetDefaultLanguageAndPlaceHoldersForIdCard(Area area)
+        {
+                    //private string[] Props { get; set; } = new string[] { "FirstName", "LastName", "BirthDay", "CardNumber", "Gender", "BloadType", "Image" };
+
+            switch (area.Name)
+            {
+                case "CardNumber":
+                    area.Language = "ara";
+                    area.Placeholder = "رقم التعريف الوطني";
+                break;
+
+                case "FirstName":
+                    area.Language = "eng";
+                    area.Placeholder = "Prénom(s)";
+                break;
+
+                case "LastName":
+                    area.Language = "eng";
+                    area.Placeholder = "Nom";
+                break;
+
+                case "BirthDay":
+                    area.Language = "ara";
+                    area.Placeholder = "تاريخ الميلاد";
+                break;
+
+                case "BloadType":
+                    area.Language = "eng";
+                    area.Placeholder = "Rh";
+                break;
+
+                case "Gender":
+                    area.Language = "ara";
+                    area.Placeholder = "الجنس";
+                break;
+            }
         }
 
         Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle r)
@@ -355,9 +396,11 @@ namespace Pikda
             var langCol = view.Columns["Language"];
 
             var propsLookUp = new RepositoryItemLookUpEdit();
-            propsLookUp.DataSource = Props;
+            propsLookUp.DataSource = Props2;
             AreasViewGrid.RepositoryItems.Add(propsLookUp);
+            
             propCol.ColumnEdit = propsLookUp;
+            propsLookUp.ReadOnly = true;
 
             var langsLookUp = new RepositoryItemLookUpEdit();
             langsLookUp.DataSource = Languages;
@@ -371,14 +414,15 @@ namespace Pikda
         {
             var wow = (AreaViewDto)AreasViewGrid.ViewCollection[e.RecordIndex].DataSource;
             Console.WriteLine("wow => " + wow.Prop);
-
+            
             var name = wow.Prop;
 
             var area = currentOcrModel.Areas.Where(a => a.Name == name).First();
             area.Language = wow.Language;
         }
 
-        private string[] Props = new string[] { "FirstName", "LastName", "BirthDay","CardNumber", "Gender", "BloadType", "Image" };
+        private List<string> Props { get; set; } = new List<string> { "FirstName", "LastName", "BirthDay", "CardNumber", "Gender", "BloadType", "Image" };
+        private List<string> Props2 { get; set; } = new List<string> { "FirstName", "LastName", "BirthDay", "CardNumber", "Gender", "BloadType", "Image" };
         private string[] Languages = new string[] { "ara", "eng" };
 
         private List<AreaViewDto> GetAreas()

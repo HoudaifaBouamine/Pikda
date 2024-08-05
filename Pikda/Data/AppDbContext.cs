@@ -12,6 +12,7 @@ namespace Pikda
     {
         public AppDbContext()
         {
+            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 

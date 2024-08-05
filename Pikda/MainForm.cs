@@ -1,4 +1,5 @@
 ﻿using Pikda.Models;
+using Pikda.OcrServiceIntegration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,24 +21,41 @@ namespace Pikda
 
         private void btn_ScanCard_Click(object sender, EventArgs e)
         {
+
             Console.WriteLine("cmb item => " + comboBox1.SelectedItem.ToString());
-            var scanner = new OcrScannerClientForm(wow.FirstOrDefault(w=>w.Name == comboBox1.SelectedItem.ToString()).Id);
-            scanner.ShowDialog();
+            var id = wow.FirstOrDefault(w => w.Name == comboBox1.SelectedItem.ToString()).Id;
+
+            var ocrDevice = new OcrDevice();
+            var ocrObject = ocrDevice.ReadCard(id);
             
-            var ocrObject = scanner.OcrObject;
-
-            scanner.Dispose();
-
+            Console.WriteLine("\n -> card number   : " + ocrObject.CardNumber);
             Console.WriteLine("\n -> birth date    : " + ocrObject.BirthDate);
             Console.WriteLine("\n -> error message : " + ocrObject.ErrorMessage);
+
         }
 
         private void btn_AddModel_Click(object sender, EventArgs e)
         {
             //var ocrModel = new OCR_Form(new OcrService(),new OcrRepository());
-            var scanner = new OcrScannerForm();
-            scanner.ShowDialog();
-            scanner.Dispose();
+
+            var ocrDevice = new OcrDevice();
+            var id = ocrDevice.CreatModel();
+
+            if(id == 0)
+            {
+                Console.WriteLine("Faild to create ocr model");
+                return;
+            }
+            
+
+            var db = new AppDbContext();
+            wow = db.OcrModels.ToList();
+
+            var newOcr = wow.FirstOrDefault(m => m.Id == id);
+            if (newOcr == null)
+                throw new Exception("Something when wrong");
+
+            comboBox1.Items.AddRange(wow.Select(w => w.Name).ToArray());
         }
 
         List<OcrModel> wow;

@@ -17,11 +17,13 @@ namespace Pikda.Models
         public float YFactor { get; private set; }
         public float WidthFactor { get; private set; }
         public float HeightFactor { get; private set; }
+        public bool IsImage { get; private set; }
+        public string ImagePath { get; private set; }
 
         [ForeignKey(nameof(OcrModel))]
         public int OcrModelId { get; set; }
 
-        public Area(string name, Rectangle imageRect, Rectangle newRect)
+        public Area(string name, Rectangle imageRect, Rectangle newRect,bool isImage = false)
         {
             Id = default;
             Name = name;
@@ -29,14 +31,28 @@ namespace Pikda.Models
             YFactor = ((float)Math.Min(newRect.Y, newRect.Y + newRect.Height)) / (imageRect.Height);
             WidthFactor = (float)Math.Abs(newRect.Width) / (imageRect.Width);
             HeightFactor = (float)Math.Abs(newRect.Height) / (imageRect.Height);
+            IsImage = isImage;
         }
         protected Area() { }
 
         public bool SetValue(string value)
         {
+            if (IsImage) return false;
+
             if(string.IsNullOrWhiteSpace(value) || string.IsNullOrEmpty(value)) return false;
 
             this.Value = value;
+            return true;
+        }
+
+        public bool SetImage(string path)
+        {
+            if(!IsImage) return false;
+
+            if (string.IsNullOrWhiteSpace(path) || string.IsNullOrEmpty(path)) return false;
+
+            this.ImagePath = path;
+
             return true;
         }
 
