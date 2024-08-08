@@ -87,9 +87,14 @@ namespace Pikda
 
             return string.IsNullOrWhiteSpace(result) ? "OCR Failed To Read Rectangle" : result;
         }
+
+        int proscount = 0;
         public string Process(Image image, string lang)
         {
             var result = _process(image,lang);
+
+
+            Console.WriteLine($"Process [{++proscount}] result is : [{result}]");
 
             return string.IsNullOrWhiteSpace(result) ? "OCR Failed To Read Rectangle" : result;
         }

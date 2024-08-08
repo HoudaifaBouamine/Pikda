@@ -9,12 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using VisioForge.Core.VideoCapture;
 using VisioForge.Libs.DirectShowLib;
+using VisioForge.Libs.MediaFoundation.OPM;
 
 namespace Pikda
 {
@@ -35,7 +37,6 @@ namespace Pikda
                 {
                     Prop = s.Name,
                     Value = s.Value,
-                    PlaceHolder = s.Placeholder,
                     Language = s.Language
                 }).ToList();
 
@@ -137,8 +138,12 @@ namespace Pikda
 
             // Set initial values for focus, brightness, and sharpness
             SetCameraProperty(CameraControlProperty.Focus, 160); // Example value
-            
-            device.Resolution = new Size(864, 480);
+
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 215); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 150); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, 0); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, 255); // Example value
+            device.Resolution = new Size(1280, 720);
         }
 
         private void InitializeDirectShowInterfaces(CameraDevice device)
@@ -287,18 +292,25 @@ namespace Pikda
 
 
             Image subImage = ((Bitmap) Image).Clone(rect, Image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, newArea.Language);
-    
 
-            //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
+            if(result == "Image")
+            {
+                newArea.Value = "";
+            }
+            else
+            {
+                var ocrText = ReadIdCardRect(subImage, newArea.Language);
+                Console.WriteLine("value read : " + ocrText);
+                newArea.Value = ocrText;
 
-            //Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
-            //Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");
-            //Console.WriteLine($"\nImage border x:{ImageBorder.X} y:{ImageBorder.Y} w: {ImageBorder.Width}, h : {ImageBorder.Height}");
-            //Console.WriteLine($"\nReal Rect x:{rect.X} y:{rect.Y} w:{rect.Width} h:{rect.Height}");
-            //Console.WriteLine($"\nShown Rect x:{CurrentRect.X} y:{CurrentRect.Y} w:{CurrentRect.Width} h:{CurrentRect.Height}");
+                //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
+                //Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
+                //Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");
+                //Console.WriteLine($"\nImage border x:{ImageBorder.X} y:{ImageBorder.Y} w: {ImageBorder.Width}, h : {ImageBorder.Height}");
+                //Console.WriteLine($"\nReal Rect x:{rect.X} y:{rect.Y} w:{rect.Width} h:{rect.Height}");
+                //Console.WriteLine($"\nShown Rect x:{CurrentRect.X} y:{CurrentRect.Y} w:{CurrentRect.Width} h:{CurrentRect.Height}");
+            }
 
-            newArea.Value = ocrText;
             currentOcrModel.AddArea(newArea);
 
             UpdateOcrModelInDb();
@@ -322,32 +334,37 @@ namespace Pikda
             {
                 case "CardNumber":
                     area.Language = "ara";
-                    area.Placeholder = "رقم التعريف الوطني";
+                    
                 break;
 
                 case "FirstName":
                     area.Language = "eng";
-                    area.Placeholder = "Prénom(s)";
+                    
                 break;
 
                 case "LastName":
                     area.Language = "eng";
-                    area.Placeholder = "Nom";
+                    
                 break;
 
                 case "BirthDay":
                     area.Language = "ara";
-                    area.Placeholder = "تاريخ الميلاد";
+                    
                 break;
 
                 case "BloadType":
                     area.Language = "eng";
-                    area.Placeholder = "Rh";
+                    
                 break;
 
                 case "Gender":
                     area.Language = "ara";
-                    area.Placeholder = "الجنس";
+                    
+                break;
+
+                case "Image":
+                    area.Language = "img";
+                    area.IsImage = true;
                 break;
             }
         }
@@ -378,7 +395,6 @@ namespace Pikda
                 var areaRow = areaView.FirstOrDefault(b => b.Prop == a.Name);
                 if (areaRow is null) return;
 
-                a.Placeholder = areaRow.PlaceHolder;
                 a.Language = areaRow.Language;
             });
 
@@ -432,7 +448,6 @@ namespace Pikda
             {
                 Prop = s.Name,
                 Value = s.Value,
-                PlaceHolder = s.Placeholder,
                 Language = s.Language
             }).ToList();
         }
@@ -645,13 +660,48 @@ namespace Pikda
             UpdateOcrModelInDb();
             currentOcrModel.Areas.ForEach(a =>
             {
-                var rect = a.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
+                if(a.Name != "Image")
+                {
+                
+                    var rect = a.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
 
-                Image subImage = ((Bitmap)image).Clone(rect, Image.PixelFormat);
+                    Image subImage = ((Bitmap)image).Clone(rect, Image.PixelFormat);
 
-                a.Value = ocrService.Process(subImage, a.Language);
+                    a.Value = ReadIdCardRect(subImage, a.Language);
+
+                }
             });
             InitializeAreasView();
+        }
+
+        string ReadIdCardRect(Image img, string lang)
+        {
+
+            return ocrService.Process(img,lang);
+
+            //// this does not work for some reasone (same output for every process)
+
+            //List<string> list = new List<string>();
+
+            //list.Add(ocrService.Process(img, lang));
+            //list.Add(ocrService.Process(img, lang));
+            //list.Add(ocrService.Process(img, lang));
+
+            //var best = list.GroupBy(l => l).Where(c=>c.Count() >= 2).FirstOrDefault();
+
+            //if(best is null)
+            //{
+            //    list.Add(ocrService.Process(img, lang));
+            //    list.Add(ocrService.Process(img, lang));
+            //    list.Add(ocrService.Process(img, lang));
+            //    list.Add(ocrService.Process(img, lang));
+            //    list.Add(ocrService.Process(img, lang));
+            //    list.Add(ocrService.Process(img, lang));
+
+            //    best = list.GroupBy(l => l).OrderByDescending(c=>c.Count()).FirstOrDefault();
+            //}
+
+            //return best.Key;
         }
     }
 }

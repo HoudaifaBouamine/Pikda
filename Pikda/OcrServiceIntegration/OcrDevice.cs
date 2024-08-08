@@ -20,6 +20,7 @@
 
             scanner.Dispose();
             
+            
             return ocrObject;
 
         }

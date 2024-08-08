@@ -1,5 +1,6 @@
 ﻿using DevExpress.Data.Camera;
 using DevExpress.Data.Helpers;
+using DevExpress.Utils.Extensions;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Camera;
 using DevExpress.XtraEditors.Repository;
@@ -18,6 +19,7 @@ using System.Threading;
 using System.Windows.Forms;
 using VisioForge.Core.VideoCapture;
 using VisioForge.Libs.DirectShowLib;
+using VisioForge.Libs.MediaFoundation.OPM;
 using VisioForge.Libs.ZXing;
 
 namespace Pikda
@@ -31,41 +33,58 @@ namespace Pikda
         VideoCaptureCore VideoCaptureCore;
         private Image Image { get => camera.TakeSnapshot(); }
 
-        bool Loading = true;
-
-        List<AreaViewClientDto> list = null;
         List<AreaViewClientDto> AreaViewDtos
         {
             get
             {
-                Console.WriteLine("wowooowowowo");
-                if (list != null && Loading == false) return list;
-
-                if (currentOcrModel == null || ocrService is null || camera is null) return new List<AreaViewClientDto>();
-
-                list = currentOcrModel.Areas.Select(s =>
+                if (currentOcrModel == null) return new List<AreaViewClientDto>();
+                var l = currentOcrModel.Areas.Select(s => new AreaViewClientDto
                 {
-                    var cameraIsLoading = camera.TakeSnapshot() == null;
-                    Loading = cameraIsLoading && (StartTime == null || DateTime.Now < StartTime + TimeSpan.FromMilliseconds(100));
-
-                    var area = new AreaViewClientDto
-                    {
-                        Prop = s.Name,
-                        Value = Loading ? "Loading..." : GetTextFromRect(s)
-                    };
-
-                    area.SetPlaceholder(s.Placeholder);
-
-                    return area;
-
+                    Prop = s.Name,
+                    Value = s.Value,
                 }).ToList();
 
                 if (AreasViewGrid != null)
-                    AreasViewGrid.DataSource = list;
+                    AreasViewGrid.DataSource = l;
 
-                return list;
+                return l;
             }
         }
+        //List<AreaViewClientDto> AreaViewDtos
+        //{
+        //    get
+        //    {
+        //        Console.WriteLine("wowooowowowo");
+        //        if (list != null && Loading == false) return list;
+
+        //        if (currentOcrModel == null || ocrService is null || camera is null) return new List<AreaViewClientDto>();
+
+        //        list = currentOcrModel.Areas.Select(s =>
+        //        {
+        //            var cameraIsLoading = camera.TakeSnapshot() == null;
+        //            Loading = cameraIsLoading && (StartTime == null || DateTime.Now < StartTime + TimeSpan.FromMilliseconds(100));
+
+        //            var area = new AreaViewClientDto
+        //            {
+        //                Prop = s.Name,
+        //                Value = Loading ? "Loading..." : GetTextFromRect(s),
+        //                IsImage = "Image" == s.Name,
+
+        //            };
+
+
+        //            //area.SetPlaceholder(s.Placeholder);
+
+        //            return area;
+
+        //        }).ToList();
+
+        //        if (AreasViewGrid != null)
+        //            AreasViewGrid.DataSource = list;
+
+        //        return list;
+        //    }
+        //}
         List<OcrModel> ocrModels = new List<OcrModel>();
 
         OcrModel currentOcrModel { get; set; }
@@ -138,8 +157,12 @@ namespace Pikda
 
             // Set initial values for focus, brightness, and sharpness
             SetCameraProperty(CameraControlProperty.Focus, 160); // Example value
-            
-            device.Resolution = new Size(864, 480);
+
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 215); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 150); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, 0); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, 255); // Example value
+            device.Resolution = new Size(1280, 720);
         }
 
         private void InitializeDirectShowInterfaces(CameraDevice device)
@@ -205,113 +228,6 @@ namespace Pikda
             public static extern int OleCreatePropertyFrame(IntPtr hwndOwner, int x, int y, [MarshalAs(UnmanagedType.LPWStr)] string caption, int cObjects, [MarshalAs(UnmanagedType.Interface)] ref object ppUnk, int cPages, IntPtr lpPageClsID, int lcid, int dwReserved, IntPtr lpvReserved);
         }
 
-        #region Draw
-        private void PictureEdit_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (currentOcrModel == null) return;
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            if (!ImageBorder.Contains(e.Location))
-                return;
-
-            StartPoint = e.Location;
-            CurrentRect = new Rectangle(e.Location, new Size(0, 0));
-        }
-
-        private void PictureEdit_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (currentOcrModel == null) return;
-            if (StartPoint == UnDefinedPoint) return;
-
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            EndPoint = e.Location;
-
-            CurrentRect = new Rectangle
-                (
-                    Math.Min(StartPoint.X, EndPoint.X),
-                    Math.Min(StartPoint.Y, EndPoint.Y),
-                    Math.Abs(StartPoint.X - EndPoint.X),
-                    Math.Abs(StartPoint.Y - EndPoint.Y)
-                );
-            CurrentRect.Intersect(ImageBorder);
-
-            //PictureEditor.Invalidate();
-        }
-
-        
-        
-        private void PictureEdit_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (StartPoint == UnDefinedPoint) return;
-
-            if (e.Button != MouseButtons.Left || Image is null)
-                return;
-
-            if (CurrentRect.Width * CurrentRect.Height == 0)
-                return;
-
-            // Add the current rectangle to the list
-            CurrentRect.Intersect(ImageBorder);
-
-            XtraInputBoxArgs args = new XtraInputBoxArgs();
-
-            ComboBoxEdit cbEdit = new ComboBoxEdit();
-            cbEdit.Properties.Items.AddRange(Props);
-
-            args.Caption = "Adding New Property";
-            args.Prompt = "Property Name";
-            args.DefaultButtonIndex = 0;
-
-            args.Editor = cbEdit;
-
-            string result = (string)XtraInputBox.Show(args);
-
-            if (string.IsNullOrEmpty(result))
-            {
-                MessageBox.Show("Can not create rectangle without prop's name", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                CurrentRect = UnDefinedRect;
-                return;
-            }
-
-
-            var newArea = GetAreaDtoFromRect(ImageBorder, result, CurrentRect);
-            
-            var rect = newArea.ToRectangle(new Rectangle(new Point(0, 0), Image.Size));
-
-
-            Image subImage = ((Bitmap) Image).Clone(rect, Image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, newArea.Language);
-    
-
-            //subImage.Save("../../Images/" + Guid.NewGuid() + ".jpg");
-
-            //Console.WriteLine($"\nImage width : {Image.Width}, height : {Image.Height}");
-            //Console.WriteLine($"\nCamera width : {camera.Device.Resolution.Width}, height : {camera.Device.Resolution.Height}");
-            //Console.WriteLine($"\nImage border x:{ImageBorder.X} y:{ImageBorder.Y} w: {ImageBorder.Width}, h : {ImageBorder.Height}");
-            //Console.WriteLine($"\nReal Rect x:{rect.X} y:{rect.Y} w:{rect.Width} h:{rect.Height}");
-            //Console.WriteLine($"\nShown Rect x:{CurrentRect.X} y:{CurrentRect.Y} w:{CurrentRect.Width} h:{CurrentRect.Height}");
-
-            newArea.Value = ocrText;
-            currentOcrModel.AddArea(newArea);
-
-            UpdateOcrModelInDb();
-
-            Rectangles.Add((CurrentRect, result));
-
-            AreasViewGrid.DataSource = GetAreas();
-       
-            StartPoint = UnDefinedPoint;
-            CurrentRect = UnDefinedRect;
-
-            
-            AreasViewGrid.Invalidate();
-        }
-
         Area GetAreaDtoFromRect(Rectangle border, string name, Rectangle r)
         {
             r = new Rectangle
@@ -325,13 +241,12 @@ namespace Pikda
             return new Area(name, border, r);
         }
 
-        #endregion
 
         #region Behaviours
 
         void UpdateOcrModelInDb()
         {
-            var areaView = AreasViewGrid.DataSource as List<AreaViewDto>;
+            var areaView = AreasViewGrid.DataSource as List<AreaViewClientDto>;
 
             if (areaView == null) return;
 
@@ -340,7 +255,6 @@ namespace Pikda
                 var areaRow = areaView.FirstOrDefault(b => b.Prop == a.Name);
                 if (areaRow is null) return;
 
-                a.Placeholder = areaRow.PlaceHolder;
             });
 
             ocrRepository.UpdateOcrModel(currentOcrModel);
@@ -365,18 +279,19 @@ namespace Pikda
 
         private string[] Props = new string[] { "FirstName", "LastName", "BirthDay","CardNumber", "Gender", "BloadType", "Image" };
 
-        private List<AreaViewDto> GetAreas()
+        private List<AreaViewClientDto> GetAreas()
         {
-            if (currentOcrModel.Areas == null) return new List<AreaViewDto>();
-            return currentOcrModel.Areas.Select(s => new AreaViewDto
+            if (currentOcrModel.Areas == null) return new List<AreaViewClientDto>();
+            return currentOcrModel.Areas.Select(s => new AreaViewClientDto
             {
                 Prop = s.Name,
                 Value = s.Value,
-                PlaceHolder = s.Placeholder,
+                
             }).ToList();
         }
 
         #endregion
+
 
         #region Drawing
 
@@ -490,38 +405,6 @@ namespace Pikda
 
         #endregion
 
-        private string GetTextFromRect(Area area)
-        {
-
-            var image = (Image)camera.TakeSnapshot();
-
-            if (image == null) return "Image Not Loaded";
-
-            var rect = area.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
-            Image subImage = ((Bitmap)image).Clone(rect, image.PixelFormat);
-            var ocrText = ocrService.Process(subImage, area.Language);
-
-            return ocrText;
-        }
-        private void cameraControl1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (currentOcrModel == null) return;
-
-            var image = (Image)camera.TakeSnapshot();
-            var text = ocrService.Process(image ,"ara");
-            System.IO.File.AppendAllText("../../Test.txt", "\n\n\n =>=> wow text is :\n\n" + text);
-
-            //foreach (var a in currentOcrModel.Areas)
-            //{
-            //    var r = GetRectFromAreaDto(new Rectangle(new Point(0, 0), image.Size),a);
-
-            //    var name = ocrService.Process(image, r.Item1, "ara");
-            //    System.IO.File.AppendAllText("../../Test-Rect.txt", $" => \nimage size x:{image.Size.Width} h:{image.Size.Height}\nx:{r.Item1.X} y:{r.Item1.Y} w:{r.Item1.Width} h:{r.Item1.Height}" + text);
-            //}
-
-            //System.IO.File.AppendAllText("../../Test-Rect.txt", "\n\n\n" + text);
-
-        }
 
         private void OcrScannerForm_Load(object sender, EventArgs e)
         {
@@ -582,16 +465,15 @@ namespace Pikda
         private void ClosingFun(object sender, EventArgs e)
         {
             //UpdateOcrModelInDb();
-            Image image = null;
+            Image image = Image;
             string error = "";
-            try
+
+            var area = currentOcrModel.Areas.FirstOrDefault(a => a.Name == "Image");
+
+            if (area != null)
             {
-                image = Image.FromFile(list.Where(a => a.Prop == "Image").FirstOrDefault()?.Value);
-            }
-            catch (Exception ex)
-            {
-                error += "\n" + ex.Message;
-                image = null;
+                var rect = area.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
+                image = ((Bitmap)image).Clone(rect, image.PixelFormat);
             }
 
             DateTime birthDate;
@@ -619,11 +501,11 @@ namespace Pikda
 
             OcrObject = new OcrObject
             {
-                FirstName = list.Where(a => a.Prop == "FirstName").FirstOrDefault()?.Value,
-                LastName = list.Where(a => a.Prop == "LastName").FirstOrDefault()?.Value,
+                FirstName = AreaViewDtos.Where(a => a.Prop == "FirstName").FirstOrDefault()?.Value,
+                LastName = AreaViewDtos.Where(a => a.Prop == "LastName").FirstOrDefault()?.Value,
                 BirthDate = birthDate,
                 BloodType = GetBloodTypeFromIdCard(),
-                CardNumber = list.Where(a => a.Prop == "CardNumber").FirstOrDefault()?.Value,
+                CardNumber = AreaViewDtos.Where(a => a.Prop == "CardNumber").FirstOrDefault()?.Value,
                 Gender = GetGenderFromIdCard(),
                 Image = image,
                 ErrorMessage = error,
@@ -632,7 +514,7 @@ namespace Pikda
 
             Gender GetGenderFromIdCard()
             {
-                var genderAsString = list.Where(a => a.Prop == "Gender").FirstOrDefault()?.Value;
+                var genderAsString = AreaViewDtos.Where(a => a.Prop == "Gender").FirstOrDefault()?.Value;
 
                 switch (genderAsString)
                 {
@@ -648,7 +530,7 @@ namespace Pikda
 
             BloodType GetBloodTypeFromIdCard()
             {
-                var bloodTypeAsString = list.Where(a => a.Prop == "BloodType").FirstOrDefault()?.Value;
+                var bloodTypeAsString = AreaViewDtos.Where(a => a.Prop == "BloodType").FirstOrDefault()?.Value;
 
                 switch (bloodTypeAsString)
                 {
@@ -683,7 +565,7 @@ namespace Pikda
 
             DateTime GetBirthDateFromIdCard()
             {
-                var parts = list.Where(a => a.Prop == "BirthDay").FirstOrDefault()?.Value.Split('.');
+                var parts = AreaViewDtos.Where(a => a.Prop == "BirthDay").FirstOrDefault()?.Value.Split('.');
                 if (parts == null) return default;
                 return new DateTime
                     (
@@ -700,7 +582,33 @@ namespace Pikda
 
         private void OcrScannerClientForm_Shown(object sender, EventArgs e)
         {
+
+
+
+            UpdateOcrModelInDb();
+            //UpdateAreas();
             InitializeAreasView();
+            
+        }
+
+        void UpdateAreas()
+        {
+
+            var image = Image;
+            currentOcrModel.Areas.ForEach(a =>
+            {
+
+                if (a.Name != "Image")
+                {
+                    var rect = a.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
+
+                    Image subImage = ((Bitmap)image).Clone(rect, image.PixelFormat);
+
+
+                    a.Value = ocrService.Process(subImage, a.Language);
+
+                }
+            });
         }
 
         private void LayoutPanel_Paint(object sender, PaintEventArgs e)
@@ -710,11 +618,10 @@ namespace Pikda
 
         private void btn_ReRead_Click(object sender, EventArgs e)
         {
-            if (!Loading)
-            {
-                Loading = true;
-                InitializeAreasView();
-            }
+
+            UpdateOcrModelInDb();
+            UpdateAreas();
+            InitializeAreasView();
         }
     }
 }

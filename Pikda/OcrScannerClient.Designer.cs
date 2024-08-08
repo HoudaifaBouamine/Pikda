@@ -68,10 +68,7 @@ namespace Pikda
             this.camera.TabIndex = 1;
             this.camera.Text = "cameraControl1";
             this.camera.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
-            this.camera.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cameraControl1_MouseClick);
-            this.camera.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseDown);
-            this.camera.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseMove);
-            this.camera.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureEdit_MouseUp);
+            
             // 
             // panelControl1
             // 

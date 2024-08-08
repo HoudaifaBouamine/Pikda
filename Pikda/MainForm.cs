@@ -30,6 +30,9 @@ namespace Pikda
             
             Console.WriteLine("\n -> card number   : " + ocrObject.CardNumber);
             Console.WriteLine("\n -> birth date    : " + ocrObject.BirthDate);
+            Console.WriteLine("\n -> image: " + ocrObject.Image.Width + "x" + ocrObject.Image.Height);
+            Console.WriteLine("\n -> first name: " + ocrObject.FirstName);
+            Console.WriteLine("\n -> last name: " + ocrObject.LastName);
             Console.WriteLine("\n -> error message : " + ocrObject.ErrorMessage);
 
         }
@@ -52,8 +55,8 @@ namespace Pikda
             wow = db.OcrModels.ToList();
 
             var newOcr = wow.FirstOrDefault(m => m.Id == id);
-            if (newOcr == null)
-                throw new Exception("Something when wrong");
+            //if (newOcr == null)
+            //    throw new Exception("Something when wrong");
 
             comboBox1.Items.AddRange(wow.Select(w => w.Name).ToArray());
         }
@@ -63,9 +66,20 @@ namespace Pikda
         {
             var db = new AppDbContext();
             wow = db.OcrModels.ToList();
+            if(wow.Count > 0)
+            {
             comboBox1.Items.AddRange(wow.Select(w=>w.Name).ToArray());
+                comboBox1.SelectedIndex = 0;
+            }
             
         }
 
+        private void comboBox1_Click(object sender, EventArgs e)
+        {
+            var db = new AppDbContext();
+            wow = db.OcrModels.ToList();
+            comboBox1.Items.AddRange(wow.Select(w => w.Name).ToArray());
+
+        }
     }
 }

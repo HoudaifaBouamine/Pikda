@@ -11,13 +11,12 @@ namespace Pikda.Models
         public int Id { get; private set; }
         public string Name { get; private set; }
         public string Value { get; set; }
-        public string Placeholder { get; set; } // string to be removed from the value
         public string Language { get; set; } = "ara";
         public float XFactor { get; private set; }
         public float YFactor { get; private set; }
         public float WidthFactor { get; private set; }
         public float HeightFactor { get; private set; }
-        public bool IsImage { get; private set; }
+        public bool IsImage { get;  set; }
         public string ImagePath { get; private set; }
 
         [ForeignKey(nameof(OcrModel))]

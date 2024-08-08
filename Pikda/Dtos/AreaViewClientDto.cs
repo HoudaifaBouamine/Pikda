@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisioForge.Libs.MediaFoundation;
+﻿using Pango;
+using System;
 
 namespace Pikda.Dtos
 {
@@ -13,36 +8,29 @@ namespace Pikda.Dtos
         public string Prop { get; set; }
 
         private string _value_without_placeholder;
-        public string Value 
+        public string Value
         {
             get
             {
-                if (string.IsNullOrEmpty(_placeHolder))
-                    return _value_without_placeholder
-                        .Replace(": ", ":")
-                        .Replace(" :", ":")
-                        .Replace(". ", ".")
-                        .Replace(" .", ".")
-                        .Trim(new char[] { ' ', ':' });
-
-                return _value_without_placeholder
-                    .Replace(_placeHolder, string.Empty)
+                var val = _value_without_placeholder
+                    .Replace("\n", "")
                     .Replace(": ", ":")
                     .Replace(" :", ":")
+                    .Replace("::", ":")
                     .Replace(". ", ".")
                     .Replace(" .", ".")
                     .Trim(new char[] { ' ', ':' });
+
+                var parts = val.Split(':');
+                if (parts.Length == 2)
+                    return parts[1];
+
+                return val;
             }
             set
             {
                 _value_without_placeholder = value.Trim();
             }
-        }
-        private string _placeHolder { get; set; } = string.Empty;
-
-        public void SetPlaceholder(string placehoder)
-        {
-            _placeHolder = placehoder;
         }
     }
 }

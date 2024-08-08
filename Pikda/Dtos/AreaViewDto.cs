@@ -16,28 +16,26 @@ namespace Pikda.Dtos
         {
             get
             {
-                if (string.IsNullOrEmpty(PlaceHolder))
-                    return _value_without_placeholder
-                        .Replace(": ", ":")
-                        .Replace(" :", ":")
-                        .Replace(". ", ".")
-                        .Replace(" .", ".")
-                        .Trim(new char[] { ' ', ':' });
-
-                return _value_without_placeholder
-                    .Replace(PlaceHolder, string.Empty)
+                var val = _value_without_placeholder
+                    .Replace("\n", "")
                     .Replace(": ", ":")
                     .Replace(" :", ":")
+                    .Replace("::", ":")
                     .Replace(". ", ".")
                     .Replace(" .", ".")
                     .Trim(new char[] { ' ', ':' });
+
+                var parts = val.Split(':');
+                if (parts.Length == 2)
+                    return parts[1];
+
+                return val;
             }
             set
             {
                 _value_without_placeholder = value.Trim();
             }
         }
-        public string PlaceHolder { get; set; } = string.Empty;
         public string Language { get; set; }
     }
 }
