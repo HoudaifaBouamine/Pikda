@@ -74,18 +74,20 @@ namespace Pikda
 
         public OcrScannerForm(int modelId)
         {
-            this.ocrService = new OcrService();
-            this.ocrRepository = new OcrRepository();
+
 
             ocrModels = ocrRepository.GetOcrModels();
             currentOcrModel = ocrModels.FirstOrDefault(o => o.Id == modelId);
+
+            InitializeComponent();
+            InitializeAreasView();
 
             if (currentOcrModel == null)
             {
                 XtraInputBoxArgs args = new XtraInputBoxArgs();
 
                 ComboBoxEdit cbEdit = new ComboBoxEdit();
-                cbEdit.Properties.Items.AddRange(Props2);
+                cbEdit.Properties.Items.AddRange(Props);
 
                 args.Caption = "Enter new model name";
                 args.Prompt = "Model Name";
@@ -103,28 +105,32 @@ namespace Pikda
                         MessageBox.Show($"Model name can not be empty", "Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    else if (ocrModels.FirstOrDefault(o=>o.Name == name) != null)
+                    else if (ocrModels.FirstOrDefault(o => o.Name == name) != null)
                     {
                         MessageBox.Show($"Model name already exist", "Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    else {
+                    else
+                    {
 
                         currentOcrModel = new OcrModel(name);
                         ocrRepository.CreateOcrModelAsync(currentOcrModel).Wait();
 
                     }
                 }
-            }
-            InitializeComponent();
 
-            InitializeAreasView();
+
+            }
 
             var logitech = CameraControl.GetDevices().FirstOrDefault(x => x.Name.Contains("Webcam"));
             if (logitech != null)
             {
                 camera.Device = CameraControl.GetDevice(logitech);
             }
+
+            InitializeCameraSettings(camera.Device);
+            richTextBox1.Text = CameraParameters.ToJson();
+
 
         }
 
@@ -133,17 +139,22 @@ namespace Pikda
         
         private void InitializeCameraSettings(CameraDevice device)
         {
+            Console.WriteLine("Camera Settings Updating...");
             // Initialize DirectShow interfaces
             InitializeDirectShowInterfaces(device);
 
-            // Set initial values for focus, brightness, and sharpness
-            SetCameraProperty(CameraControlProperty.Focus, 160); // Example value
-
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 215); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 150); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, 0); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, 255); // Example value
             device.Resolution = new Size(1280, 720);
+            // Set initial values for focus, brightness, and sharpness
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, CameraParameters.Brightness);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, CameraParameters.Sharpness);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, CameraParameters.Saturation);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, CameraParameters.Contrast);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Gain, CameraParameters.Gain);
+            SetCameraProperty(CameraControlProperty.Exposure, CameraParameters.Exposure);
+            SetCameraProperty(CameraControlProperty.Focus, CameraParameters.Focus);
+
+
+            Console.WriteLine("Camera Settings Updated");
         }
 
         private void InitializeDirectShowInterfaces(CameraDevice device)
@@ -486,7 +497,36 @@ namespace Pikda
                 Rectangles = areas.Select(a => GetRectFromAreaDto(ImageBorder, a)).ToList();
             }
 
+            if(isFirst)
+            {
+                UpdateAreas();
+                InitializeAreasView();
+
+                isFirst = false;
+            }
         }
+
+        void UpdateAreas()
+        {
+
+            var image = Image;
+            currentOcrModel.Areas.ForEach(a =>
+            {
+
+                if (a.Name != "Image")
+                {
+                    var rect = a.ToRectangle(new Rectangle(new Point(0, 0), image.Size));
+
+                    Image subImage = ((Bitmap)image).Clone(rect, image.PixelFormat);
+
+
+                    a.Value = ocrService.Process(subImage, a.Language);
+
+                }
+            });
+        }
+
+        bool isFirst = true;
         (Rectangle, string) GetRectFromAreaDto(Rectangle border, Area area)
         {
             var rect = area.ToRectangle(border);
@@ -588,7 +628,7 @@ namespace Pikda
 
         private void OcrScannerForm_Load(object sender, EventArgs e)
         {
-            InitializeCameraSettings(camera.Device);
+           
 
         }
 
@@ -702,6 +742,13 @@ namespace Pikda
             //}
 
             //return best.Key;
+        }
+
+        private void btn_reInit_Camera_Click(object sender, EventArgs e)
+        {
+            var json = richTextBox1.Text;
+            CameraParameters.SetFromJson(json);
+            InitializeCameraSettings(camera.Device);
         }
     }
 }

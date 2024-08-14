@@ -81,5 +81,11 @@ namespace Pikda
             comboBox1.Items.AddRange(wow.Select(w => w.Name).ToArray());
 
         }
+
+        private void btn_update_Click(object sender, EventArgs e)
+        {
+            var frm = new CameraParametersEditor();
+            frm.Show();
+        }
     }
 }

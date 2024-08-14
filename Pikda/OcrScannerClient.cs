@@ -20,6 +20,7 @@ using System.Windows.Forms;
 using VisioForge.Core.VideoCapture;
 using VisioForge.Libs.DirectShowLib;
 using VisioForge.Libs.MediaFoundation.OPM;
+using VisioForge.Libs.TagLib.Ogg.Codecs;
 using VisioForge.Libs.ZXing;
 
 namespace Pikda
@@ -93,11 +94,15 @@ namespace Pikda
 
         public OcrScannerClientForm(int modelId)
         {
+
             
 
             ocrModels = ocrRepository.GetOcrModels();
             currentOcrModel = ocrModels.FirstOrDefault(o => o.Id == modelId);
 
+            InitializeComponent();
+            InitializeAreasView();
+            
             if (currentOcrModel == null)
             {
                 XtraInputBoxArgs args = new XtraInputBoxArgs();
@@ -133,10 +138,9 @@ namespace Pikda
 
                     }
                 }
-            }
-            InitializeComponent();
 
-            InitializeAreasView();
+
+            }
 
             var logitech = CameraControl.GetDevices().FirstOrDefault(x => x.Name.Contains("Webcam"));
             if (logitech != null)
@@ -145,6 +149,8 @@ namespace Pikda
             }
 
             InitializeCameraSettings(camera.Device);
+            richTextBox1.Text = CameraParameters.ToJson();
+
         }
 
         private IAMCameraControl cameraControl;
@@ -152,18 +158,25 @@ namespace Pikda
         
         private void InitializeCameraSettings(CameraDevice device)
         {
+            Console.WriteLine("Camera Settings Updating...");
             // Initialize DirectShow interfaces
             InitializeDirectShowInterfaces(device);
 
             // Set initial values for focus, brightness, and sharpness
-            SetCameraProperty(CameraControlProperty.Focus, 160); // Example value
+            SetCameraProperty(CameraControlProperty.Exposure, CameraParameters.Exposure);
+            SetCameraProperty(CameraControlProperty.Focus, CameraParameters.Focus);
 
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, 215); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, 150); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, 0); // Example value
-            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, 255); // Example value
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Brightness, CameraParameters.Brightness);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Sharpness, CameraParameters.Sharpness);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Saturation, CameraParameters.Saturation);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Contrast, CameraParameters.Contrast);
+            SetVideoProcAmpProperty(VideoProcAmpProperty.Gain, CameraParameters.Gain);
             device.Resolution = new Size(1280, 720);
+
+            Console.WriteLine("Camera Settings Updated");
         }
+
+        
 
         private void InitializeDirectShowInterfaces(CameraDevice device)
         {
@@ -325,7 +338,15 @@ namespace Pikda
                 Rectangles = areas.Select(a => GetRectFromAreaDto(ImageBorder, a)).ToList();
             }
 
+            if(isFirst)
+            {
+                UpdateAreas();
+                InitializeAreasView();
+
+                isFirst = false;
+            }
         }
+        bool isFirst = true;
         (Rectangle, string) GetRectFromAreaDto(Rectangle border, Area area)
         {
             var rect = area.ToRectangle(border);
@@ -618,10 +639,23 @@ namespace Pikda
 
         private void btn_ReRead_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("\n\n --> CameraParameters : \n\n" + CameraParameters.ToJson() + "\n\n");
 
             UpdateOcrModelInDb();
             UpdateAreas();
             InitializeAreasView();
+        }
+
+        private void btn_reInit_Camera_Click(object sender, EventArgs e)
+        {
+            var json = richTextBox1.Text;
+            CameraParameters.SetFromJson(json);
+            InitializeCameraSettings(camera.Device);
+        }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

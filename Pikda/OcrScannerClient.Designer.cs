@@ -33,9 +33,11 @@ namespace Pikda
             this.LayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.camera = new DevExpress.XtraEditors.Camera.CameraControl();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btn_reInit_Camera = new System.Windows.Forms.Button();
+            this.btn_ReRead = new System.Windows.Forms.Button();
             this.AreasViewGrid = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.btn_ReRead = new System.Windows.Forms.Button();
             this.LayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
@@ -68,10 +70,11 @@ namespace Pikda
             this.camera.TabIndex = 1;
             this.camera.Text = "cameraControl1";
             this.camera.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureEdit_Paint);
-            
             // 
             // panelControl1
             // 
+            this.panelControl1.Controls.Add(this.richTextBox1);
+            this.panelControl1.Controls.Add(this.btn_reInit_Camera);
             this.panelControl1.Controls.Add(this.btn_ReRead);
             this.panelControl1.Controls.Add(this.AreasViewGrid);
             this.panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -79,6 +82,37 @@ namespace Pikda
             this.panelControl1.Name = "panelControl1";
             this.panelControl1.Size = new System.Drawing.Size(266, 560);
             this.panelControl1.TabIndex = 2;
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(2, 307);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(267, 157);
+            this.richTextBox1.TabIndex = 4;
+            this.richTextBox1.Text = "";
+            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
+            // 
+            // btn_reInit_Camera
+            // 
+            this.btn_reInit_Camera.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btn_reInit_Camera.Location = new System.Drawing.Point(2, 470);
+            this.btn_reInit_Camera.Name = "btn_reInit_Camera";
+            this.btn_reInit_Camera.Size = new System.Drawing.Size(262, 44);
+            this.btn_reInit_Camera.TabIndex = 3;
+            this.btn_reInit_Camera.Text = "Reload Camera";
+            this.btn_reInit_Camera.UseVisualStyleBackColor = true;
+            this.btn_reInit_Camera.Click += new System.EventHandler(this.btn_reInit_Camera_Click);
+            // 
+            // btn_ReRead
+            // 
+            this.btn_ReRead.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btn_ReRead.Location = new System.Drawing.Point(2, 514);
+            this.btn_ReRead.Name = "btn_ReRead";
+            this.btn_ReRead.Size = new System.Drawing.Size(262, 44);
+            this.btn_ReRead.TabIndex = 2;
+            this.btn_ReRead.Text = "Read Again";
+            this.btn_ReRead.UseVisualStyleBackColor = true;
+            this.btn_ReRead.Click += new System.EventHandler(this.btn_ReRead_Click);
             // 
             // AreasViewGrid
             // 
@@ -95,17 +129,6 @@ namespace Pikda
             // 
             this.gridView1.GridControl = this.AreasViewGrid;
             this.gridView1.Name = "gridView1";
-            // 
-            // btn_ReRead
-            // 
-            this.btn_ReRead.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btn_ReRead.Location = new System.Drawing.Point(2, 514);
-            this.btn_ReRead.Name = "btn_ReRead";
-            this.btn_ReRead.Size = new System.Drawing.Size(262, 44);
-            this.btn_ReRead.TabIndex = 2;
-            this.btn_ReRead.Text = "Read Again";
-            this.btn_ReRead.UseVisualStyleBackColor = true;
-            this.btn_ReRead.Click += new System.EventHandler(this.btn_ReRead_Click);
             // 
             // OcrScannerClientForm
             // 
@@ -137,6 +160,8 @@ namespace Pikda
         private Button btn_ReRead;
         private DevExpress.XtraGrid.GridControl AreasViewGrid;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private Button btn_reInit_Camera;
+        private RichTextBox richTextBox1;
     }
 }
 

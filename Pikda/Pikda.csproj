@@ -359,6 +359,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CameraParametersEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CameraParametersEditor.Designer.cs">
+      <DependentUpon>CameraParametersEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\AppDbContext.cs" />
     <Compile Include="Dtos\AreaViewClientDto.cs" />
     <Compile Include="Dtos\AreaViewDto.cs" />
@@ -389,6 +395,9 @@
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CameraParametersEditor.resx">
+      <DependentUpon>CameraParametersEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Text.Json;
 using Tesseract;
 
 namespace Pikda
@@ -189,4 +190,56 @@ namespace Pikda
             return result;
         }
     }
-}
+
+    public class CameraParameters
+    {
+
+        public static int Focus { get; set; } = 140;
+        public static int Exposure { get; set; } = -4;
+        public static int Brightness { get; set; } = 200;
+        public static int Sharpness { get; set; } = 170;
+        public static int Saturation { get; set; } = 0;
+        public static int Contrast { get; set; } = 200;
+        public static int Gain { get; set; } = 180;
+
+        public static string ToJson()
+        {
+            return JsonSerializer.Serialize(new CameraParametersDto
+            {
+                Focus = Focus,
+                Exposure = Exposure,
+                Brightness = Brightness,
+                Sharpness = Sharpness,
+                Saturation = Saturation,
+                Contrast = Contrast,
+                Gain = Gain
+            });
+        }
+
+        public static string SetFromJson(string json)
+        {
+            var newValues = JsonSerializer.Deserialize<CameraParametersDto>(json);
+
+            Focus = newValues.Focus;
+            Exposure = newValues.Exposure;
+            Brightness = newValues.Brightness;
+            Sharpness = newValues.Sharpness;
+            Saturation = newValues.Saturation;
+            Contrast = newValues.Contrast;
+            Gain = newValues.Gain;
+
+            return ToJson();
+        }
+
+        public class CameraParametersDto
+        {
+            public int Focus { get; set; }
+            public int Exposure { get; set; } 
+            public int Brightness { get; set; }
+            public int Sharpness { get; set; }
+            public int Saturation { get; set; }
+            public int Contrast { get; set; }
+            public int Gain { get; set; }
+        }
+        }
+    }

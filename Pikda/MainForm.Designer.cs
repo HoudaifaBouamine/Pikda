@@ -31,6 +31,7 @@
             this.btn_ScanCard = new System.Windows.Forms.Button();
             this.btn_AddModel = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.btn_update = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_ScanCard
@@ -62,11 +63,22 @@
             this.comboBox1.TabIndex = 2;
             this.comboBox1.Click += new System.EventHandler(this.comboBox1_Click);
             // 
+            // btn_update
+            // 
+            this.btn_update.Location = new System.Drawing.Point(406, 86);
+            this.btn_update.Name = "btn_update";
+            this.btn_update.Size = new System.Drawing.Size(150, 46);
+            this.btn_update.TabIndex = 3;
+            this.btn_update.Text = "Update Parameters";
+            this.btn_update.UseVisualStyleBackColor = true;
+            this.btn_update.Click += new System.EventHandler(this.btn_update_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btn_update);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.btn_AddModel);
             this.Controls.Add(this.btn_ScanCard);
@@ -82,5 +94,6 @@
         private System.Windows.Forms.Button btn_ScanCard;
         private System.Windows.Forms.Button btn_AddModel;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button btn_update;
     }
 }
